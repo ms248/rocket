@@ -1,0 +1,3116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>수정쌤과 함께하는 로켓런처로 배우는 기체의 과학</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===================== Variables ===================== */
+  :root {
+    --navy: #0F2A47;
+    --navy-dark: #081A2E;
+    --orange: #F26B38;
+    --orange-light: #FBA774;
+    --yellow: #F5C242;
+    --teal: #2D7A8C;
+    --cream: #FFF9F0;
+    --bg: #FAFAFA;
+    --text: #1F2937;
+    --text-light: #6B7280;
+    --rule: #E5E7EB;
+    --white: #FFFFFF;
+
+    --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-display: 'Gmarket Sans', 'Pretendard', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  /* ===================== Reset ===================== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--navy-dark);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  /* ===================== Deck Layout ===================== */
+  .deck {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .slide {
+    position: absolute;
+    width: min(92vw, calc((100vh - 100px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: var(--bg);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(40px);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+  .slide.prev {
+    transform: translateX(-40px);
+  }
+  .slide-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* Scale the inner content as the slide size changes */
+    container-type: size;
+    padding: 4.5cqw 4cqw 3cqw 4cqw;
+    /* All sizes inside use container query units (cqw/cqh) */
+    font-size: 1.6cqw;
+  }
+
+  /* ===================== Common pieces ===================== */
+  .tag {
+    display: inline-block;
+    font-size: 1cqw;
+    letter-spacing: 0.35em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 1cqw;
+    text-transform: uppercase;
+  }
+  .slide-title {
+    font-family: var(--font-display);
+    font-size: 3.2cqw;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.8cqw;
+  }
+  .slide-sub {
+    font-size: 1.35cqw;
+    color: var(--text-light);
+    margin-bottom: 2.4cqw;
+  }
+  .footer {
+    position: absolute;
+    bottom: 1.6cqw;
+    left: 4cqw;
+    right: 4cqw;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-light);
+    font-size: 0.85cqw;
+  }
+  .slide-dark .footer { color: rgba(255,255,255,0.4); }
+
+  /* ===================== Slide 1: Title ===================== */
+  .slide-title-page {
+    background: var(--navy-dark);
+    color: var(--white);
+  }
+  .slide-title-page .bg-circle-1 {
+    position: absolute; top: -18%; right: -8%;
+    width: 50%; aspect-ratio: 1;
+    background: var(--navy); border-radius: 50%;
+  }
+  .slide-title-page .bg-circle-2 {
+    position: absolute; top: -10%; right: -2%;
+    width: 32%; aspect-ratio: 1;
+    background: var(--orange); opacity: 0.2; border-radius: 50%;
+  }
+  .slide-title-page .star {
+    position: absolute;
+    background: var(--yellow);
+    border-radius: 50%;
+  }
+  .slide-title-page .star.s1 { width: 0.7cqw; height: 0.7cqw; top: 16%; left: 12%; }
+  .slide-title-page .star.s2 { width: 0.9cqw; height: 0.9cqw; bottom: 12%; left: 18%; }
+  .slide-title-page .star.s3 { width: 1.1cqw; height: 1.1cqw; top: 11%; left: 65%; }
+  .slide-title-page .star.s4 { width: 0.7cqw; height: 0.7cqw; bottom: 26%; left: 89%; }
+
+  .title-tag {
+    display: inline-block;
+    background: var(--orange);
+    color: var(--white);
+    font-size: 1cqw;
+    padding: 0.5cqw 1.2cqw;
+    border-radius: 0.3cqw;
+    font-weight: 700;
+    margin-bottom: 1.5cqw;
+    position: relative; z-index: 2;
+  }
+  .title-page-sub {
+    font-size: 1.4cqw;
+    font-style: italic;
+    color: var(--orange-light);
+    margin-bottom: 3cqw;
+    position: relative; z-index: 2;
+  }
+  .title-page-pre {
+    font-family: var(--font-display);
+    font-size: 3.5cqw;
+    color: var(--white);
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 0.5cqw;
+    position: relative; z-index: 2;
+  }
+  .title-page-big {
+    font-family: var(--font-display);
+    font-size: 7cqw;
+    color: var(--white);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    position: relative; z-index: 2;
+  }
+  .title-page-rule {
+    width: 4cqw; height: 0.3cqw;
+    background: var(--orange);
+    margin: 3.5cqw 0 1cqw;
+    position: relative; z-index: 2;
+  }
+  .title-page-meta {
+    font-size: 1.45cqw;
+    color: var(--white);
+    position: relative; z-index: 2;
+  }
+  .title-page-credit {
+    position: absolute;
+    bottom: 4cqw;
+    left: 4cqw;
+    font-size: 0.95cqw;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ===================== Grid utilities ===================== */
+  .grid { display: grid; gap: 1.5cqw; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  /* ===================== Cards ===================== */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: relative;
+  }
+  .card.cream { background: var(--cream); border-color: var(--orange-light); }
+  .card.navy { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .card.dark { background: var(--navy-dark); color: var(--white); border-color: var(--navy-dark); }
+  .card-bar {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0.35cqw;
+    border-radius: 0.6cqw 0 0 0.6cqw;
+  }
+  .card-num {
+    font-family: var(--font-display);
+    font-size: 3cqw;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 1cqw;
+  }
+  .card-h {
+    font-size: 1.4cqw;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.6cqw;
+  }
+  .card-b {
+    font-size: 1.05cqw;
+    color: var(--text-light);
+    line-height: 1.55;
+  }
+
+  /* ===================== Icon circles ===================== */
+  .icon-circle {
+    width: 4cqw; height: 4cqw;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2cqw;
+    margin-bottom: 1cqw;
+  }
+  .icon-circle.solid {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: var(--white);
+    font-size: 1.4cqw;
+    width: 2.3cqw; height: 2.3cqw;
+    font-weight: 700;
+  }
+
+  /* ===================== Slide 2: Objectives ===================== */
+  .obj-grid { gap: 1.2cqw; }
+  .obj-card .card-bar { display: block; }
+  .obj-1 .card-num, .obj-1 .card-bar { color: var(--orange); background: var(--orange); }
+  .obj-2 .card-num, .obj-2 .card-bar { color: var(--teal); background: var(--teal); }
+  .obj-3 .card-num, .obj-3 .card-bar { color: var(--navy); background: var(--navy); }
+  .obj-4 .card-num, .obj-4 .card-bar { color: var(--yellow); background: var(--yellow); }
+  .obj-card .card-num { font-family: var(--font-display); }
+
+  /* ===================== Slide 3: Intro ===================== */
+  .intro-card { text-align: left; padding: 1.4cqw 1.2cqw; }
+  .intro-card .icon-circle { width: 3.5cqw; height: 3.5cqw; font-size: 2cqw; margin-bottom: 0.9cqw; }
+  .intro-card .card-h { font-size: 1.3cqw; }
+  .intro-card .card-b { font-size: 0.95cqw; }
+  .intro-banner {
+    margin-top: 1.5cqw;
+    background: var(--navy);
+    border-radius: 0.5cqw;
+    padding: 1.5cqw 2cqw;
+    color: var(--white);
+    font-size: 1.25cqw;
+  }
+  .intro-banner b { color: var(--orange); }
+
+  /* ===================== Slide 4: Gas particles ===================== */
+  .two-col { display: grid; grid-template-columns: 5fr 6fr; gap: 2cqw; align-items: stretch; }
+  .col-h {
+    font-size: 1.5cqw;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 1cqw;
+  }
+  .feat-list { list-style: none; }
+  .feat-list li {
+    position: relative;
+    padding-left: 1.5cqw;
+    margin-bottom: 0.9cqw;
+  }
+  .feat-list li::before {
+    content: "•";
+    position: absolute; left: 0.3cqw;
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 1.5cqw;
+    line-height: 1;
+  }
+  .feat-list .ft-h { font-weight: 700; font-size: 1.15cqw; color: var(--text); }
+  .feat-list .ft-d { font-size: 1cqw; color: var(--text-light); margin-top: 0.2cqw; }
+
+  .molecule-box {
+    position: relative;
+    background: var(--white);
+    border: 0.2cqw solid var(--navy);
+    border-radius: 0.4cqw;
+    aspect-ratio: 16 / 11;
+  }
+  .molecule {
+    position: absolute;
+    width: 1.5cqw; height: 1.5cqw;
+    background: var(--orange);
+    border-radius: 50%;
+  }
+  .molecule::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 100%;
+    width: 1.5cqw;
+    height: 0.15cqw;
+    background: var(--text-light);
+    transform-origin: left center;
+  }
+  .mb-caption {
+    text-align: center;
+    font-size: 1cqw;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 0.8cqw;
+  }
+
+  /* ===================== Slide 5: Pressure ===================== */
+  .def-box {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw 1.5cqw 1.5cqw 2cqw;
+    position: relative;
+  }
+  .def-box::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0.35cqw;
+    background: var(--orange);
+    border-radius: 0.6cqw 0 0 0.6cqw;
+  }
+  .def-label {
+    font-size: 1cqw;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.8cqw;
+  }
+  .formula {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text);
+    margin: 0.5cqw 0;
+  }
+  .formula .big { font-size: 2.6cqw; }
+  .formula .var { font-size: 2cqw; color: var(--navy); }
+  .formula-note { font-size: 1cqw; color: var(--text-light); margin-top: 0.5cqw; }
+
+  .note-box {
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.6cqw;
+    padding: 1.3cqw 1.5cqw;
+  }
+  .note-box .nl {
+    font-size: 1.1cqw;
+    font-weight: 700;
+    color: var(--orange);
+    margin-bottom: 0.6cqw;
+  }
+  .note-box p { font-size: 1.15cqw; color: var(--text); line-height: 1.6; }
+  .note-box .nq { font-size: 1cqw; color: var(--text-light); font-style: italic; margin-top: 0.5cqw; }
+
+  .pressure-vis {
+    background: var(--white);
+    border: 0.2cqw solid var(--navy);
+    border-radius: 0.4cqw;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .pressure-vis .arrow {
+    position: absolute;
+    right: 1cqw;
+    width: 4cqw;
+    height: 0.2cqw;
+    background: var(--teal);
+  }
+  .pressure-vis .arrow::after {
+    content: '';
+    position: absolute; right: -0.5cqw; top: -0.45cqw;
+    width: 0; height: 0;
+    border-left: 0.7cqw solid var(--teal);
+    border-top: 0.5cqw solid transparent;
+    border-bottom: 0.5cqw solid transparent;
+  }
+
+  /* ===================== Slide 6: Boyle's law ===================== */
+  .formula-banner {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 0.6cqw;
+    padding: 2cqw;
+    text-align: center;
+    font-family: var(--font-display);
+    margin-bottom: 1.5cqw;
+  }
+  .formula-banner .pv { font-size: 4.5cqw; font-weight: 700; letter-spacing: -0.02em; }
+  .formula-banner .or { font-size: 2cqw; color: var(--orange-light); margin: 0 1.5cqw; }
+  .formula-banner .pv-eq { font-size: 3.5cqw; font-weight: 700; }
+  .formula-banner sub { font-size: 0.5em; }
+
+  .pv-box-h {
+    font-size: 1.2cqw;
+    font-weight: 700;
+    margin-bottom: 0.4cqw;
+  }
+  .pv-box .arrow-up { color: var(--orange); }
+  .pv-box-2 .arrow-up { color: var(--teal); }
+  .pv-box-big {
+    font-size: 2.1cqw;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0.5cqw 0 0.8cqw;
+    font-family: var(--font-display);
+  }
+  .pv-box p { font-size: 1.05cqw; color: var(--text-light); margin-bottom: 0.5cqw; }
+  .pv-box .ex { font-size: 1cqw; color: var(--teal); font-style: italic; }
+
+  /* ===================== Slide 7: Graph ===================== */
+  .graph-row { display: grid; grid-template-columns: 7fr 5fr; gap: 1.5cqw; }
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+  }
+  .chart-card .ch-title {
+    font-size: 1.1cqw;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 1cqw;
+    text-align: center;
+  }
+  .chart-card svg { width: 100%; height: auto; display: block; }
+
+  .obs-list { list-style: none; padding: 0; }
+  .obs-list li {
+    display: flex;
+    margin-bottom: 1cqw;
+    align-items: flex-start;
+    gap: 0.8cqw;
+    font-size: 1.05cqw;
+    color: var(--text);
+  }
+  .obs-list .obs-n {
+    color: var(--orange);
+    font-weight: 700;
+    font-family: var(--font-display);
+    min-width: 1.4cqw;
+  }
+  .obs-list .obs-d {
+    font-size: 0.95cqw;
+    color: var(--text-light);
+    margin-top: 0.2cqw;
+  }
+  .obs-warn {
+    background: var(--navy-dark);
+    color: var(--yellow);
+    text-align: center;
+    padding: 0.8cqw;
+    border-radius: 0.4cqw;
+    font-size: 1cqw;
+    font-weight: 700;
+    margin-top: 1cqw;
+  }
+
+  /* ===================== Slide 8: Real-world Boyle ===================== */
+  .case-card {
+    position: relative;
+    padding: 1.4cqw;
+  }
+  .case-card .case-tag {
+    position: absolute;
+    top: 1.4cqw; right: 1.4cqw;
+    background: var(--navy);
+    color: var(--white);
+    font-size: 0.85cqw;
+    padding: 0.4cqw 0.8cqw;
+    border-radius: 0.3cqw;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .case-card.hi { background: var(--cream); border: 0.2cqw solid var(--orange); }
+  .case-card.hi .case-tag { background: var(--orange); }
+  .case-card .case-h {
+    font-size: 1.4cqw;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.7cqw;
+    padding-right: 8cqw;
+  }
+  .case-card p { font-size: 1cqw; color: var(--text); line-height: 1.6; }
+
+  /* ===================== Slide 9: Newton ===================== */
+  .quote-banner {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 0.6cqw;
+    padding: 2.5cqw 2cqw;
+    text-align: center;
+    margin-bottom: 0.7cqw;
+  }
+  .quote-banner .qm { color: var(--orange); font-size: 2.6cqw; font-weight: 700; line-height: 0.5; }
+  .quote-banner .qt {
+    font-family: var(--font-display);
+    font-size: 2.3cqw;
+    font-weight: 700;
+    color: var(--white);
+    display: inline;
+    margin: 0 1cqw;
+  }
+  .quote-cite {
+    text-align: center;
+    font-size: 0.95cqw;
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 1.8cqw;
+  }
+  .step-h {
+    font-size: 1.4cqw;
+    font-weight: 700;
+    color: var(--orange);
+    margin-bottom: 1cqw;
+  }
+  .step-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.2cqw;
+  }
+  .step-card-h {
+    display: flex; align-items: center; gap: 0.8cqw;
+    margin-bottom: 0.8cqw;
+  }
+  .step-card .step-num {
+    width: 2.2cqw; height: 2.2cqw;
+    background: var(--orange);
+    color: var(--white);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.4cqw;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-card-t { font-size: 1.2cqw; font-weight: 700; color: var(--navy); }
+  .step-card p { font-size: 0.95cqw; color: var(--text-light); line-height: 1.55; }
+
+  /* ===================== Slide 10: Speed ===================== */
+  .speed-left {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+  }
+  .speed-left .sec { margin-bottom: 1.4cqw; }
+  .speed-left .sec:last-child { margin-bottom: 0; }
+  .speed-left .lbl {
+    font-size: 1cqw;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.6cqw;
+  }
+  .speed-left .eq {
+    font-family: var(--font-display);
+    font-size: 2.2cqw;
+    font-weight: 700;
+    margin-bottom: 0.4cqw;
+  }
+  .speed-left .eq .var { color: var(--navy); }
+  .speed-left .sub { font-size: 1cqw; color: var(--text-light); }
+  .speed-left .hr {
+    height: 1px; background: var(--rule);
+    margin: 1cqw 0;
+  }
+  .speed-left .arrow-note {
+    font-size: 1.05cqw; color: var(--teal); font-style: italic; margin-top: 0.5cqw;
+  }
+
+  .factor-card {
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.6cqw;
+    padding: 1cqw 1.2cqw;
+    display: flex;
+    align-items: center;
+    gap: 1cqw;
+    margin-bottom: 0.8cqw;
+  }
+  .factor-card .ficon {
+    width: 2.6cqw; height: 2.6cqw;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3cqw;
+    flex-shrink: 0;
+  }
+  .factor-card .ft { font-size: 1.2cqw; font-weight: 700; color: var(--navy); }
+  .factor-card .fd { font-size: 0.95cqw; color: var(--text-light); margin-top: 0.2cqw; }
+
+  /* ===================== Slide 11: Parts ===================== */
+  .parts-grid { grid-template-columns: repeat(3, 1fr); gap: 1.2cqw; }
+  .part-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.2cqw 1.3cqw;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .part-num {
+    font-family: var(--font-display);
+    font-size: 2.5cqw;
+    font-weight: 700;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 0.6cqw;
+  }
+  .part-h { font-size: 1.2cqw; font-weight: 700; color: var(--navy); margin-bottom: 0.4cqw; }
+  .part-d { font-size: 0.92cqw; color: var(--text-light); line-height: 1.55; }
+
+  /* ===================== Slide 12: Safety ===================== */
+  .warn-banner {
+    background: var(--orange);
+    color: var(--white);
+    border-radius: 0.6cqw;
+    padding: 1.3cqw 1.8cqw;
+    font-size: 1.25cqw;
+    font-weight: 700;
+    margin-bottom: 1.2cqw;
+    display: flex; align-items: center; gap: 1cqw;
+  }
+  .warn-icon { font-size: 1.8cqw; }
+
+  .check-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.5cqw;
+    padding: 1cqw 1.2cqw;
+    display: flex; gap: 0.8cqw; align-items: flex-start;
+  }
+  .check-card .cb {
+    width: 1.5cqw; height: 1.5cqw;
+    background: var(--orange);
+    color: var(--white);
+    border-radius: 0.25cqw;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 1cqw;
+    flex-shrink: 0;
+    margin-top: 0.1cqw;
+  }
+  .check-card .ct { font-size: 1.1cqw; font-weight: 700; color: var(--navy); margin-bottom: 0.2cqw; }
+  .check-card .cd { font-size: 0.9cqw; color: var(--text-light); line-height: 1.5; }
+
+  /* ===================== Slide 13: Steps ===================== */
+  .step-row {
+    display: grid;
+    grid-template-columns: 7cqw 12cqw 1fr 5cqw;
+    gap: 0;
+    align-items: stretch;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.4cqw;
+    overflow: hidden;
+    margin-bottom: 0.5cqw;
+    min-height: 3.5cqw;
+  }
+  .step-row .sn {
+    background: var(--navy);
+    color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05cqw;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    font-family: var(--font-display);
+  }
+  .step-row .st {
+    display: flex; align-items: center;
+    padding: 0 1.2cqw;
+    font-size: 1.2cqw;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .step-row .sd {
+    display: flex; align-items: center;
+    padding: 0.8cqw 1.2cqw;
+    font-size: 1cqw;
+    color: var(--text);
+  }
+  .step-row .stime {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--cream);
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 0.95cqw;
+    border-left: 1px solid var(--orange-light);
+  }
+  .step-foot {
+    margin-top: 0.7cqw;
+    font-size: 0.95cqw;
+    color: var(--text-light);
+    font-style: italic;
+  }
+
+  /* ===================== Slide 14: Integration flow ===================== */
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    align-items: center;
+    margin-bottom: 1.5cqw;
+  }
+  .flow-card {
+    background: var(--white);
+    border: 0.2cqw solid var(--orange);
+    border-radius: 0.5cqw;
+    padding: 1.5cqw 0.8cqw;
+    text-align: center;
+    position: relative;
+  }
+  .flow-card.c2 { border-color: var(--navy); }
+  .flow-card.c3 { border-color: var(--teal); }
+  .flow-card .fc-num {
+    width: 3.5cqw; height: 3.5cqw;
+    background: var(--orange);
+    color: var(--white);
+    border-radius: 50%;
+    margin: 0 auto 1cqw;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 2.5cqw;
+    font-weight: 700;
+  }
+  .flow-card.c2 .fc-num { background: var(--navy); }
+  .flow-card.c3 .fc-num { background: var(--teal); }
+  .flow-card .fc-t { font-size: 1.2cqw; font-weight: 700; color: var(--navy); margin-bottom: 0.5cqw; }
+  .flow-card .fc-s { font-size: 1cqw; font-weight: 700; color: var(--orange); font-family: var(--font-mono); }
+  .flow-card.c2 .fc-s { color: var(--navy); }
+  .flow-card.c3 .fc-s { color: var(--teal); }
+  .flow-arrow {
+    color: var(--text-light);
+    font-size: 2cqw;
+    text-align: center;
+  }
+  .summary-banner {
+    background: var(--navy-dark);
+    color: var(--white);
+    border-radius: 0.5cqw;
+    padding: 1.2cqw 1.5cqw;
+  }
+  .summary-banner .sb-lbl {
+    font-size: 0.9cqw;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.5cqw;
+  }
+  .summary-banner .sb-t { font-size: 1.2cqw; line-height: 1.6; }
+  .summary-banner .sb-t b { color: var(--yellow); }
+
+  /* ===================== Slide 15: Experiment ===================== */
+  .exp-row { display: grid; grid-template-columns: 4fr 7fr; gap: 1.5cqw; }
+  .hyp-box {
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+  }
+  .hyp-lbl {
+    font-size: 1cqw;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.8cqw;
+  }
+  .hyp-q {
+    font-size: 1.4cqw;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.4;
+    margin-bottom: 1.5cqw;
+  }
+  .var-list .vt { font-size: 1.05cqw; font-weight: 700; color: var(--text); margin-top: 0.7cqw; }
+  .var-list .vd { font-size: 0.95cqw; color: var(--text-light); }
+  .exp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.05cqw;
+  }
+  .exp-table th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0.6cqw;
+    font-weight: 700;
+    font-size: 1cqw;
+  }
+  .exp-table td {
+    padding: 0.6cqw;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+  .exp-table td:first-child { border-left: 1px solid var(--rule); }
+  .exp-table .ph { color: var(--text-light); }
+  .exp-foot {
+    margin-top: 0.8cqw;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 0.4cqw;
+    padding: 0.7cqw 1.2cqw;
+    font-size: 0.95cqw;
+    font-style: italic;
+  }
+
+  /* ===================== Slide 16: Apps ===================== */
+  .app-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.3cqw;
+    display: flex;
+    gap: 1.2cqw;
+    align-items: flex-start;
+  }
+  .app-card .ai-circle {
+    width: 4.5cqw; height: 4.5cqw;
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5cqw;
+    flex-shrink: 0;
+  }
+  .app-card .at { font-size: 1.3cqw; font-weight: 700; color: var(--navy); margin-bottom: 0.5cqw; }
+  .app-card .ad { font-size: 0.95cqw; color: var(--text-light); line-height: 1.55; }
+
+  /* ===================== Slide 17: Career ===================== */
+  .career-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5cqw; }
+  .career-left {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 0.6cqw;
+    padding: 1.8cqw;
+  }
+  .career-left .cl-lbl {
+    font-size: 1cqw;
+    letter-spacing: 0.4em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.8cqw;
+  }
+  .career-left .cl-h {
+    font-family: var(--font-display);
+    font-size: 2.4cqw;
+    font-weight: 700;
+    margin-bottom: 1cqw;
+  }
+  .career-left .cl-d { font-size: 1.1cqw; color: rgba(255,255,255,0.85); line-height: 1.6; margin-bottom: 1.5cqw; }
+  .career-left .cl-rule { width: 3cqw; height: 0.25cqw; background: var(--orange); margin-bottom: 1cqw; }
+  .career-left .cl-skill-h { color: var(--orange); font-weight: 700; font-size: 1.05cqw; margin-bottom: 0.6cqw; }
+  .career-left .cl-skill { font-size: 1cqw; margin-bottom: 0.35cqw; }
+
+  .link-row {
+    display: grid;
+    grid-template-columns: 1fr 1cqw 1fr;
+    align-items: center;
+    margin-bottom: 0.6cqw;
+    gap: 0.4cqw;
+  }
+  .link-row .from {
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.4cqw;
+    padding: 0.7cqw;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.95cqw;
+  }
+  .link-row .arr { color: var(--orange); font-weight: 700; text-align: center; font-size: 1.2cqw; }
+  .link-row .to {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.4cqw;
+    padding: 0.7cqw;
+    text-align: center;
+    color: var(--navy);
+    font-size: 0.9cqw;
+  }
+  .career-right-h {
+    font-size: 1.2cqw;
+    font-weight: 700;
+    color: var(--orange);
+    margin-bottom: 0.8cqw;
+  }
+
+  /* ===================== Slide 18: Wrap up ===================== */
+  .slide-dark {
+    background: var(--navy-dark);
+    color: var(--white);
+  }
+  .slide-dark .slide-title { color: var(--white); }
+  .slide-dark .tag { color: var(--orange); }
+  .slide-dark .bg-blob1 {
+    position: absolute; bottom: -10%; left: -10%;
+    width: 30%; aspect-ratio: 1;
+    background: var(--navy); border-radius: 50%;
+  }
+  .slide-dark .bg-blob2 {
+    position: absolute; top: -10%; right: -5%;
+    width: 25%; aspect-ratio: 1;
+    background: var(--orange); opacity: 0.15; border-radius: 50%;
+  }
+  .sum-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1cqw; margin-top: 0.5cqw; margin-bottom: 1.5cqw; }
+  .sum-card {
+    background: var(--navy);
+    border: 1px solid var(--orange);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+    text-align: center;
+  }
+  .sum-big {
+    font-family: var(--font-display);
+    font-size: 5.5cqw;
+    font-weight: 700;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 0.8cqw;
+  }
+  .sum-small {
+    font-size: 1.4cqw;
+    font-weight: 700;
+    color: var(--yellow);
+    margin-bottom: 0.8cqw;
+  }
+  .sum-desc { font-size: 1cqw; color: var(--white); line-height: 1.55; }
+  .wrap-rule { width: 4cqw; height: 0.25cqw; background: var(--orange); margin-bottom: 0.8cqw; }
+  .wrap-next {
+    color: var(--orange); font-weight: 700; font-size: 1.05cqw;
+  }
+  .wrap-next-d { color: var(--white); font-size: 1.05cqw; margin-left: 0.5cqw; }
+  .wrap-q { font-size: 0.95cqw; color: var(--orange-light); font-style: italic; margin-top: 0.6cqw; }
+
+  /* ===================== Nav UI ===================== */
+  .nav {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(15, 42, 71, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    z-index: 10;
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav button {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .nav button:hover { background: var(--orange); border-color: var(--orange); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav button:disabled:hover { background: transparent; border-color: rgba(255,255,255,0.18); }
+  .nav .counter { min-width: 50px; text-align: center; letter-spacing: 0.1em; }
+  .nav .fs-btn { font-size: 12px; }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--orange);
+    transition: width 0.3s ease;
+    z-index: 10;
+  }
+
+  .hint {
+    position: fixed;
+    top: 18px; right: 18px;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    z-index: 10;
+    user-select: none;
+  }
+  .hint kbd {
+    display: inline-block;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    margin: 0 2px;
+  }
+
+  /* Mobile */
+  @media (max-width: 700px) {
+    .hint { display: none; }
+    .deck { padding: 12px; }
+    .slide { width: 96vw; }
+    .nav { font-size: 12px; padding: 8px 12px; gap: 10px; }
+    .nav button { width: 28px; height: 28px; }
+  }
+  /* ===================== INTERACTIVE: Piston (Slide 6) ===================== */
+  .piston-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1.5cqw;
+    margin-top: 0.5cqw;
+  }
+  .piston-stage {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.6cqw;
+    padding: 1.5cqw;
+    position: relative;
+  }
+  .piston-label {
+    font-size: 1cqw;
+    letter-spacing: 0.3em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 0.8cqw;
+  }
+  .syringe {
+    position: relative;
+    width: 100%;
+    height: 8cqw;
+    background: linear-gradient(to bottom, #f8fafc 0%, #fff 100%);
+    border: 0.2cqw solid var(--navy);
+    border-radius: 0.4cqw;
+    overflow: hidden;
+  }
+  .syringe-chamber {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    background: rgba(242, 107, 56, 0.06);
+    transition: width 0.05s linear;
+  }
+  .syringe-piston {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 0.8cqw;
+    background: var(--navy);
+    cursor: ew-resize;
+    transition: left 0.05s linear;
+    z-index: 3;
+    box-shadow: 0 0 0 0.1cqw rgba(255,255,255,0.4) inset;
+  }
+  .syringe-piston::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.4cqw; height: 60%;
+    background: var(--orange);
+    border-radius: 0.1cqw;
+  }
+  .syringe-piston::after {
+    content: '⇔';
+    position: absolute;
+    top: -1.5cqw; left: 50%;
+    transform: translateX(-50%);
+    color: var(--orange);
+    font-size: 1.2cqw;
+    font-weight: 700;
+  }
+  .syringe-mol {
+    position: absolute;
+    width: 0.9cqw; height: 0.9cqw;
+    background: var(--orange);
+    border-radius: 50%;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .piston-slider {
+    width: 100%;
+    margin-top: 1.2cqw;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 0.4cqw;
+    background: var(--rule);
+    border-radius: 0.2cqw;
+    outline: none;
+  }
+  .piston-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.5cqw; height: 1.5cqw;
+    background: var(--orange);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 0.15cqw solid white;
+    box-shadow: 0 0.1cqw 0.4cqw rgba(0,0,0,0.2);
+  }
+  .piston-slider::-moz-range-thumb {
+    width: 1.5cqw; height: 1.5cqw;
+    background: var(--orange);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 0.15cqw solid white;
+  }
+  .piston-hint {
+    text-align: center;
+    margin-top: 0.6cqw;
+    font-size: 0.9cqw;
+    color: var(--text-light);
+    font-style: italic;
+  }
+  .readout-stack { display: flex; flex-direction: column; gap: 0.7cqw; }
+  .readout {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 0.5cqw;
+    padding: 0.8cqw 1cqw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .readout.const {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+  .readout-name {
+    font-size: 1cqw;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+  .readout.const .readout-name { color: var(--orange); letter-spacing: 0.15em; }
+  .readout-val {
+    font-family: var(--font-display);
+    font-size: 2cqw;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .readout.const .readout-val { color: var(--yellow); font-size: 2.3cqw; }
+  .readout-bar {
+    width: 8cqw;
+    height: 0.4cqw;
+    background: var(--rule);
+    border-radius: 0.2cqw;
+    margin-left: 0.8cqw;
+    overflow: hidden;
+  }
+  .readout-bar-fill {
+    height: 100%;
+    border-radius: 0.2cqw;
+    transition: width 0.2s ease;
+  }
+  .readout.v .readout-bar-fill { background: var(--teal); }
+  .readout.p .readout-bar-fill { background: var(--orange); }
+  .preset-row {
+    display: flex; gap: 0.5cqw;
+    margin-top: 0.8cqw;
+  }
+  .preset-btn {
+    flex: 1;
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.3cqw;
+    color: var(--orange);
+    padding: 0.5cqw 0.3cqw;
+    font-size: 0.85cqw;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { background: var(--orange); color: white; }
+
+  /* ===================== INTERACTIVE: Boyle graph hover (Slide 7) ===================== */
+  .chart-card svg { cursor: crosshair; }
+  #boyleHover { display: none; }
+  #boyleHover.active { display: block; }
+  .hover-readout {
+    position: absolute;
+    background: var(--navy);
+    color: var(--white);
+    padding: 0.4cqw 0.6cqw;
+    border-radius: 0.3cqw;
+    font-family: var(--font-mono);
+    font-size: 0.85cqw;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    transform: translate(-50%, -110%);
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .hover-readout.active { opacity: 1; }
+  .hover-readout::after {
+    content: '';
+    position: absolute;
+    bottom: -0.4cqw; left: 50%;
+    transform: translateX(-50%);
+    border: 0.4cqw solid transparent;
+    border-top-color: var(--navy);
+  }
+
+  /* ===================== INTERACTIVE: Rocket launch (Slide 9) ===================== */
+  .launch-zone {
+    position: relative;
+    height: 11cqw;
+    background: linear-gradient(to bottom, #E0F2FE 0%, #f0f9ff 70%, #c7e0eb 100%);
+    border-radius: 0.6cqw;
+    overflow: hidden;
+    margin-top: 0.8cqw;
+    border: 1px solid var(--rule);
+  }
+  .launch-zone::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1cqw;
+    background: linear-gradient(to bottom, #84B59F, #6a9580);
+  }
+  .rocket-svg {
+    position: absolute;
+    bottom: 1.2cqw;
+    left: 30%;
+    width: 4cqw;
+    height: 7cqw;
+    transition: transform 0.05s linear;
+    z-index: 3;
+  }
+  .smoke {
+    position: absolute;
+    width: 0.6cqw; height: 0.6cqw;
+    background: rgba(107, 114, 128, 0.5);
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .force-label {
+    position: absolute;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1cqw;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 4;
+  }
+  .force-label.up { color: var(--orange); }
+  .force-label.down { color: var(--teal); }
+  .force-label.show { opacity: 1; }
+  .launch-controls {
+    position: absolute;
+    top: 1cqw; right: 1cqw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5cqw;
+    z-index: 4;
+  }
+  .launch-btn {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 0.4cqw;
+    padding: 0.7cqw 1.2cqw;
+    font-size: 1cqw;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body);
+    box-shadow: 0 0.3cqw 0.8cqw rgba(242, 107, 56, 0.4);
+    transition: all 0.15s;
+  }
+  .launch-btn:hover { background: #d65a2a; transform: translateY(-1px); }
+  .launch-btn:active { transform: translateY(0); }
+  .launch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .reset-btn {
+    background: white;
+    color: var(--navy);
+    border: 1px solid var(--rule);
+    border-radius: 0.4cqw;
+    padding: 0.4cqw 1cqw;
+    font-size: 0.85cqw;
+    cursor: pointer;
+  }
+  .reset-btn:hover { background: var(--rule); }
+
+  /* Compress slide 9 layout since we added launch zone */
+  .slide-newton .quote-banner { padding: 1.8cqw 2cqw; }
+  .slide-newton .qt { font-size: 1.8cqw; }
+  .slide-newton .quote-cite { margin-bottom: 1cqw; }
+  .slide-newton .step-h { margin-bottom: 0.6cqw; }
+  .slide-newton .step-card { padding: 1cqw; }
+  .slide-newton .step-card p { font-size: 0.85cqw; }
+
+  /* ===================== Slide 13: Staggered reveal ===================== */
+  .slide-steps .step-row {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .slide-steps.revealed .step-row {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .slide-steps.revealed .step-row:nth-child(1) { transition-delay: 0.1s; }
+  .slide-steps.revealed .step-row:nth-child(2) { transition-delay: 0.25s; }
+  .slide-steps.revealed .step-row:nth-child(3) { transition-delay: 0.4s; }
+  .slide-steps.revealed .step-row:nth-child(4) { transition-delay: 0.55s; }
+  .slide-steps.revealed .step-row:nth-child(5) { transition-delay: 0.7s; }
+
+  /* ===================== Quiz Slide ===================== */
+  .quiz-slide { background: var(--navy-dark); color: var(--white); }
+  .quiz-question {
+    font-family: var(--font-display);
+    font-size: 2.6cqw;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 3cqw;
+    line-height: 1.3;
+    position: relative; z-index: 2;
+  }
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2cqw;
+    position: relative; z-index: 2;
+  }
+  .quiz-btn {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 1.5cqw;
+    font-weight: 600;
+    padding: 1.4cqw 1.8cqw;
+    border-radius: 0.8cqw;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.8cqw;
+    line-height: 1.3;
+  }
+  .quiz-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.15);
+    border-color: var(--orange);
+    transform: translateY(-2px);
+  }
+  .quiz-btn .q-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.2cqw; height: 2.2cqw; min-width: 2.2cqw;
+    background: var(--orange); color: var(--white);
+    border-radius: 50%;
+    font-size: 1.1cqw; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .quiz-btn.correct {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: #22c55e;
+  }
+  .quiz-btn.wrong {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    opacity: 0.7;
+  }
+  .quiz-feedback {
+    margin-top: 2cqw;
+    padding: 1.2cqw 1.8cqw;
+    border-radius: 0.8cqw;
+    font-size: 1.35cqw;
+    font-weight: 600;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s, transform 0.4s;
+    position: relative; z-index: 2;
+  }
+  .quiz-feedback.show { opacity: 1; transform: translateY(0); }
+  .quiz-feedback.ok { background: rgba(34,197,94,0.2); border-left: 3px solid #22c55e; color: #bbf7d0; }
+  .quiz-feedback.no { background: rgba(239,68,68,0.15); border-left: 3px solid #ef4444; color: #fca5a5; }
+  .quiz-reset {
+    margin-top: 1.5cqw;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.6);
+    font-size: 1.1cqw;
+    padding: 0.5cqw 1.4cqw;
+    border-radius: 0.5cqw;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    position: relative; z-index: 2;
+  }
+  .quiz-reset.show { display: inline-block; }
+  .quiz-reset:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.5); color: var(--white); }
+
+  /* ===================== Rocket Simulator ===================== */
+  .rocket-sim-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 2cqw;
+    height: calc(100% - 8cqw);
+  }
+  .sim-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2cqw;
+    justify-content: center;
+  }
+  .sim-label {
+    font-size: 1.1cqw;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.3cqw;
+  }
+  .sim-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8cqw;
+  }
+  .sim-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 0.5cqw;
+    border-radius: 0.25cqw;
+    background: #e5e7eb;
+    outline: none;
+    cursor: pointer;
+  }
+  .sim-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.4cqw; height: 1.4cqw;
+    border-radius: 50%;
+    background: var(--orange);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(242,107,56,0.4);
+  }
+  .sim-val {
+    font-family: var(--font-mono);
+    font-size: 1.3cqw;
+    font-weight: 700;
+    color: var(--orange);
+    min-width: 2.5cqw;
+    text-align: right;
+  }
+  .sim-launch-btn {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    font-family: var(--font-display);
+    font-size: 1.5cqw;
+    font-weight: 700;
+    padding: 0.9cqw 2cqw;
+    border-radius: 0.5cqw;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5cqw;
+  }
+  .sim-launch-btn:hover:not(:disabled) { background: #d95a2a; transform: translateY(-2px); }
+  .sim-launch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sim-record {
+    background: var(--cream);
+    border: 1px solid var(--orange-light);
+    border-radius: 0.6cqw;
+    padding: 0.8cqw 1cqw;
+    font-size: 0.95cqw;
+    color: var(--text);
+  }
+  .sim-record-title { font-weight: 700; color: var(--navy); margin-bottom: 0.4cqw; font-size: 1cqw; }
+  .sim-record-list { list-style: none; padding: 0; margin: 0; max-height: 14cqw; overflow-y: auto; }
+  .sim-record-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.25cqw 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9cqw; }
+  .sim-record-list li:last-child { border-bottom: none; }
+  .sim-record-list .rec-p { color: var(--orange); font-weight: 700; font-size: 0.95cqw; }
+  .sim-canvas-wrap {
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB 0%, #B0E0FF 60%, #8BC34A 92%, #6A9E3A 100%);
+    border-radius: 0.8cqw;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  #rocketSimCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .sim-height-badge {
+    position: absolute;
+    top: 0.8cqw;
+    right: 0.8cqw;
+    background: rgba(15,42,71,0.85);
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 1.1cqw;
+    font-weight: 700;
+    padding: 0.4cqw 0.8cqw;
+    border-radius: 0.4cqw;
+  }
+
+  /* ===================== Molecule Temperature Control ===================== */
+  .mol-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6cqw;
+    margin-top: 0.6cqw;
+  }
+  .mol-ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6cqw;
+    font-size: 1cqw;
+    color: var(--text-light);
+  }
+  .mol-ctrl-row label { font-weight: 700; min-width: 3cqw; font-size: 0.95cqw; }
+  .mol-ctrl-row input[type=range] {
+    flex: 1;
+    height: 0.35cqw;
+    cursor: pointer;
+    -webkit-appearance: none;
+    background: #e5e7eb;
+    border-radius: 0.2cqw;
+    outline: none;
+  }
+  .mol-ctrl-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.1cqw; height: 1.1cqw;
+    border-radius: 50%;
+    background: var(--teal);
+    cursor: pointer;
+  }
+  .mol-ctrl-val { font-family: var(--font-mono); font-size: 0.9cqw; color: var(--teal); min-width: 2.5cqw; text-align: right; font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="hint">
+  <kbd>←</kbd> <kbd>→</kbd> 슬라이드 이동 &nbsp;·&nbsp; <kbd>F</kbd> 전체화면
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1: Title ============ -->
+  <section class="slide slide-title-page">
+    <div class="slide-inner">
+      <div class="bg-circle-1"></div>
+      <div class="bg-circle-2"></div>
+      <span class="star s1"></span><span class="star s2"></span>
+      <span class="star s3"></span><span class="star s4"></span>
+
+      <div class="title-tag">#진로체험</div>
+      <div class="title-page-sub">보일의 법칙 · 압력 · 물체의 속력 · 기체의 압력과 부피</div>
+      <div class="title-page-pre">수정쌤과 함께하는 로켓런처로 배우는</div>
+      <div class="title-page-big">기체의 과학</div>
+      <div class="title-page-rule"></div>
+      <div class="title-page-meta">이론 · 키트 제작 · 응용 활동</div>
+      <div class="title-page-credit">Korea Toy Director Association — 교육용 키트 수업안</div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: Objectives ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">OVERVIEW</span>
+      <h1 class="slide-title">오늘의 학습 목표</h1>
+      <p class="slide-sub">이 수업이 끝나면 이 네 가지를 설명할 수 있어야 해요</p>
+
+      <div class="grid grid-2 obj-grid">
+        <div class="card obj-card obj-1">
+          <div class="card-bar"></div>
+          <div class="card-num">01</div>
+          <div class="card-h">기체의 압력과 부피의 관계</div>
+          <div class="card-b">보일의 법칙(PV = 일정)을 이해하고 수식과 그래프로 표현할 수 있다.</div>
+        </div>
+        <div class="card obj-card obj-2">
+          <div class="card-bar"></div>
+          <div class="card-num">02</div>
+          <div class="card-h">압력이 만드는 힘</div>
+          <div class="card-b">압축된 공기가 어떻게 큰 힘으로 바뀌는지 설명할 수 있다.</div>
+        </div>
+        <div class="card obj-card obj-3">
+          <div class="card-bar"></div>
+          <div class="card-num">03</div>
+          <div class="card-h">작용·반작용과 속력</div>
+          <div class="card-b">뉴턴의 운동 법칙으로 로켓이 날아가는 원리를 분석할 수 있다.</div>
+        </div>
+        <div class="card obj-card obj-4">
+          <div class="card-bar"></div>
+          <div class="card-num">04</div>
+          <div class="card-h">키트 제작과 응용</div>
+          <div class="card-b">안전하게 로켓런처를 조립하고 실험으로 변인을 통제할 수 있다.</div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3: Intro ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">INTRO</span>
+      <h1 class="slide-title">이 장면, 어디서 본 적 있나요?</h1>
+      <p class="slide-sub">일상의 모든 곳에 '기체의 압력'이 숨어 있어요</p>
+
+      <div class="grid grid-4">
+        <div class="card intro-card">
+          <div class="icon-circle">🎈</div>
+          <div class="card-h">풍선 불기</div>
+          <div class="card-b">공기를 불어 넣을수록 풍선 내부 압력이 높아지고 부풀어 오르며 부피가 커집니다.</div>
+        </div>
+        <div class="card intro-card">
+          <div class="icon-circle">💉</div>
+          <div class="card-h">주사기 누르기</div>
+          <div class="card-b">막힌 주사기를 누르면 공기가 압축되며 부피는 줄고 압력은 커집니다.</div>
+        </div>
+        <div class="card intro-card">
+          <div class="icon-circle">🚲</div>
+          <div class="card-h">자전거 타이어</div>
+          <div class="card-b">펌프질로 공기를 좁은 공간에 가두면 타이어가 단단하게 부풀어 오릅니다.</div>
+        </div>
+        <div class="card intro-card">
+          <div class="icon-circle">🌊</div>
+          <div class="card-h">잠수와 귀 먹먹함</div>
+          <div class="card-b">물 속으로 깊이 들어갈수록 외부 압력이 커져 귓속 공기가 압축됩니다.</div>
+        </div>
+      </div>
+
+      <div class="intro-banner">
+        <b>오늘의 질문</b> &nbsp;—&nbsp; 눈에 보이지 않는 공기가 어떻게 무거운 로켓을 하늘로 쏘아 올릴 수 있을까?
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4: Gas ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 01</span>
+      <h1 class="slide-title">기체는 어떻게 생겼을까?</h1>
+      <p class="slide-sub">기체는 빠르게 움직이는 분자들의 집합이에요</p>
+
+      <div class="two-col">
+        <div>
+          <div class="col-h">기체의 세 가지 특징</div>
+          <ul class="feat-list">
+            <li>
+              <div class="ft-h">분자 사이 거리가 매우 멀다</div>
+              <div class="ft-d">액체나 고체보다 분자 간 공간이 압도적으로 넓어요.</div>
+            </li>
+            <li>
+              <div class="ft-h">모든 방향으로 끊임없이 움직인다</div>
+              <div class="ft-d">직진하다 다른 분자나 벽에 부딪히며 방향을 바꿔요.</div>
+            </li>
+            <li>
+              <div class="ft-h">용기의 모양과 부피를 따라간다</div>
+              <div class="ft-d">고정된 모양이 없어 어떤 공간이든 가득 채워요.</div>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <div class="molecule-box" id="mbox"></div>
+          <div class="mol-controls">
+            <div class="mol-ctrl-row">
+              <label>온도</label>
+              <input type="range" id="molTemp" min="1" max="5" step="0.5" value="2">
+              <span class="mol-ctrl-val" id="molTempVal">보통</span>
+            </div>
+          </div>
+          <div class="mb-caption">기체 분자의 무작위 운동 — 온도가 높을수록 빠르게 움직여요</div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5: Pressure ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 02</span>
+      <h1 class="slide-title">압력이란 무엇인가?</h1>
+      <p class="slide-sub">면을 누르는 힘의 세기 — 그게 바로 압력이에요</p>
+
+      <div class="two-col" style="grid-template-columns: 1fr 1fr;">
+        <div style="display: flex; flex-direction: column; gap: 1.2cqw;">
+          <div class="def-box">
+            <div class="def-label">정의</div>
+            <div class="formula">
+              <span class="big">압력 P = </span><span class="var">힘 (F)</span><span class="big"> / </span><span class="var">넓이 (A)</span>
+            </div>
+            <div class="formula-note">단위: 파스칼(Pa) · 1 Pa = 1 N/m² &nbsp;&nbsp; (대기압 ≈ 101,325 Pa)</div>
+          </div>
+          <div class="note-box">
+            <div class="nl">같은 힘이라도…</div>
+            <p>닿는 면적이 <b>좁을수록</b> 압력은 커지고<br>면적이 <b>넓을수록</b> 압력은 작아져요.</p>
+            <div class="nq">→ 그래서 송곳은 잘 박히고, 스키는 눈에 빠지지 않아요.</div>
+          </div>
+        </div>
+        <div class="pressure-vis" id="pvis"></div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6: Boyle ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 03 · 핵심</span>
+      <h1 class="slide-title">보일의 법칙</h1>
+      <p class="slide-sub">온도가 일정할 때, 기체의 압력과 부피는 반비례한다</p>
+
+      <div class="formula-banner">
+        <span class="pv">P × V = 일정</span>
+        <span class="or">또는</span>
+        <span class="pv-eq">P<sub>1</sub>V<sub>1</sub> = P<sub>2</sub>V<sub>2</sub></span>
+      </div>
+
+      <div class="piston-row">
+        <div class="piston-stage">
+          <div class="piston-label">인터랙티브 주사기 — 슬라이더를 움직여 보세요</div>
+          <div class="syringe" id="syringe">
+            <div class="syringe-chamber" id="syringeChamber"></div>
+            <div class="syringe-piston" id="syringePiston"></div>
+          </div>
+          <input type="range" class="piston-slider" id="pistonSlider"
+                 min="20" max="95" value="80" step="1" />
+          <div class="piston-hint">⬅ 부피 작게 (압축)        부피 크게 (팽창) ➡</div>
+          <div class="preset-row">
+            <button class="preset-btn" data-v="90">V를 크게 (90)</button>
+            <button class="preset-btn" data-v="50">중간 (50)</button>
+            <button class="preset-btn" data-v="25">압축 (25)</button>
+          </div>
+        </div>
+        <div class="readout-stack">
+          <div class="readout v">
+            <span class="readout-name">부피 V</span>
+            <span style="display:flex; align-items:center;">
+              <span class="readout-val" id="rV">80</span>
+              <span class="readout-bar"><span class="readout-bar-fill" id="rVbar" style="width: 84%"></span></span>
+            </span>
+          </div>
+          <div class="readout p">
+            <span class="readout-name">압력 P</span>
+            <span style="display:flex; align-items:center;">
+              <span class="readout-val" id="rP">125</span>
+              <span class="readout-bar"><span class="readout-bar-fill" id="rPbar" style="width: 12.5%"></span></span>
+            </span>
+          </div>
+          <div class="readout const">
+            <span class="readout-name">P × V (일정!)</span>
+            <span class="readout-val" id="rPV">10,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ 1: Boyle's Law ============ -->
+  <section class="slide quiz-slide">
+    <div class="slide-inner">
+      <div class="bg-circle-1"></div>
+      <div class="bg-circle-2"></div>
+      <span class="tag" style="color:var(--yellow);">QUIZ TIME</span>
+      <div class="quiz-question">풍선을 양손으로 꽉 쥐어 부피를 절반으로 줄이면,<br>풍선 안의 압력은 어떻게 될까요?</div>
+      <div class="quiz-options" id="q1-options">
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q1')"><span class="q-letter">A</span>압력이 절반으로 줄어든다</button>
+        <button class="quiz-btn" data-correct="true"  onclick="quizClick(this,'q1')"><span class="q-letter">B</span>압력이 2배로 늘어난다</button>
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q1')"><span class="q-letter">C</span>압력이 4배로 늘어난다</button>
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q1')"><span class="q-letter">D</span>압력은 변하지 않는다</button>
+      </div>
+      <div class="quiz-feedback" id="q1-feedback"></div>
+      <button class="quiz-reset" id="q1-reset" onclick="quizReset('q1')">다시 풀기</button>
+      <div class="footer" style="color:rgba(255,255,255,0.4)"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 7: Graph ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 03 · 시각화</span>
+      <h1 class="slide-title">그래프로 보는 보일의 법칙</h1>
+      <p class="slide-sub">P와 V는 곱이 일정한 '쌍곡선' 관계예요</p>
+
+      <div class="graph-row">
+        <div class="chart-card" id="chartCard" style="position: relative;">
+          <div class="ch-title">압력 P  vs  부피 V   (P × V = 일정)</div>
+          <div class="hover-readout" id="hoverReadout">V = 5.0 · P = 20.0 · P×V = 100</div>
+          <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid meet" id="boyleSvg">
+            <!-- grid -->
+            <g stroke="#E5E7EB" stroke-width="0.5">
+              <line x1="60" y1="40" x2="60" y2="320"/>
+              <line x1="60" y1="320" x2="580" y2="320"/>
+              <line x1="60" y1="80" x2="580" y2="80"/>
+              <line x1="60" y1="140" x2="580" y2="140"/>
+              <line x1="60" y1="200" x2="580" y2="200"/>
+              <line x1="60" y1="260" x2="580" y2="260"/>
+            </g>
+            <!-- y-axis labels -->
+            <g font-size="11" fill="#6B7280" font-family="JetBrains Mono">
+              <text x="50" y="84" text-anchor="end">120</text>
+              <text x="50" y="144" text-anchor="end">90</text>
+              <text x="50" y="204" text-anchor="end">60</text>
+              <text x="50" y="264" text-anchor="end">30</text>
+              <text x="50" y="324" text-anchor="end">0</text>
+            </g>
+            <!-- x-axis labels -->
+            <g font-size="11" fill="#6B7280" font-family="JetBrains Mono">
+              <text x="60" y="340" text-anchor="middle">1</text>
+              <text x="164" y="340" text-anchor="middle">3</text>
+              <text x="268" y="340" text-anchor="middle">5</text>
+              <text x="372" y="340" text-anchor="middle">7</text>
+              <text x="476" y="340" text-anchor="middle">9</text>
+              <text x="580" y="340" text-anchor="middle">10</text>
+            </g>
+            <!-- axis titles -->
+            <text x="320" y="358" text-anchor="middle" font-size="11" fill="#6B7280">부피 V (임의 단위)</text>
+            <text x="14" y="180" font-size="11" fill="#6B7280" transform="rotate(-90, 14, 180)" text-anchor="middle">압력 P (임의 단위)</text>
+            <!-- curve: P = 100/V, V from 1 to 10 -->
+            <path id="boyleCurve" fill="none" stroke="#F26B38" stroke-width="3" stroke-linecap="round"/>
+            <!-- dots -->
+            <g id="boyleDots" fill="#F26B38"></g>
+            <!-- interactive hover point -->
+            <g id="boyleHover">
+              <line id="hoverVLine" x1="0" y1="40" x2="0" y2="320" stroke="#0F2A47" stroke-width="0.8" stroke-dasharray="3,3"/>
+              <line id="hoverHLine" x1="60" y1="0" x2="580" y2="0" stroke="#0F2A47" stroke-width="0.8" stroke-dasharray="3,3"/>
+              <circle id="hoverPoint" cx="0" cy="0" r="7" fill="#0F2A47" stroke="white" stroke-width="2"/>
+            </g>
+          </svg>
+          <div class="piston-hint" style="margin-top: 0.4cqw;">💡 그래프 위에 마우스를 올려보세요</div>
+        </div>
+
+        <div class="card" style="display:flex; flex-direction:column;">
+          <div style="font-size: 1.2cqw; font-weight: 700; color: var(--orange); margin-bottom: 1cqw;">그래프에서 확인해요</div>
+          <ul class="obs-list">
+            <li><span class="obs-n">1.</span><span>부피가 2배 ↑  →  압력이 1/2 ↓</span></li>
+            <li><span class="obs-n">2.</span><span>부피가 1/2 ↓  →  압력이 2배 ↑</span></li>
+            <li><span class="obs-n">3.</span><span>두 값을 곱하면 어디서나 같은 수</span></li>
+            <li><span class="obs-n">4.</span><span>곡선은 절대로 0에 닿지 않아요<div class="obs-d">(분자가 사라질 수는 없으니까)</div></span></li>
+          </ul>
+          <div class="obs-warn">⚠  단, 온도와 기체 양이 일정할 때</div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8: Real-world Boyle ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 03 · 응용</span>
+      <h1 class="slide-title">어디에 숨어 있을까?</h1>
+      <p class="slide-sub">보일의 법칙은 우리 주변 곳곳에서 작동하고 있어요</p>
+
+      <div class="grid grid-2">
+        <div class="case-card card">
+          <div class="case-tag">P↑ ⇒ V↓</div>
+          <div class="case-h">스쿠버 다이빙</div>
+          <p>수심이 10m 깊어질 때마다 압력이 약 1기압씩 커집니다. 폐 속 공기 부피가 줄어들기 때문에 다이버는 일정한 깊이마다 호흡을 조절해야 해요.</p>
+        </div>
+        <div class="case-card card">
+          <div class="case-tag">P↓ ⇒ V↑</div>
+          <div class="case-h">비행기 안 과자봉지</div>
+          <p>지상보다 기압이 낮은 고도에서는 봉지 안 기체 부피가 커져 빵빵하게 부풀어 오릅니다.</p>
+        </div>
+        <div class="case-card card">
+          <div class="case-tag">P↑→P↓ ⇒ V↑</div>
+          <div class="case-h">스프레이·에어로졸</div>
+          <p>통 안에 고압으로 압축된 기체가 노즐로 빠져나오며 부피가 급격히 커집니다. 분출되는 힘으로 액체가 분사돼요.</p>
+        </div>
+        <div class="case-card hi">
+          <div class="case-tag">P↑→폭발적 V↑</div>
+          <div class="case-h">로켓런처 키트</div>
+          <p>공기를 압축해 좁은 공간에 가두었다가 한꺼번에 풀어 부피가 팽창하는 힘으로 로켓을 발사합니다. ← 오늘 만들 키트!</p>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9: Newton ============ -->
+  <section class="slide slide-newton">
+    <div class="slide-inner">
+      <span class="tag">이론 04</span>
+      <h1 class="slide-title">작용과 반작용</h1>
+      <p class="slide-sub">로켓이 날아가는 진짜 이유 — 뉴턴의 세 번째 법칙</p>
+
+      <div class="quote-banner">
+        <span class="qm">❝</span>
+        <span class="qt">모든 작용에는 크기는 같고 방향이 반대인 반작용이 있다.</span>
+        <span class="qm">❞</span>
+      </div>
+      <div class="quote-cite">—  Isaac Newton, 1687  (작용·반작용 법칙)</div>
+
+      <div class="step-h">로켓런처에서는 이렇게 작동해요</div>
+
+      <div class="grid grid-3">
+        <div class="step-card">
+          <div class="step-card-h">
+            <div class="step-num">1</div>
+            <div class="step-card-t">공기를 압축</div>
+          </div>
+          <p>펌프나 누름판으로 좁은 공간에 공기를 가둡니다. 압력이 매우 높아진 상태예요.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-card-h">
+            <div class="step-num">2</div>
+            <div class="step-card-t">공기가 아래로 분출</div>
+          </div>
+          <p>장치가 열리면 압축된 공기가 빠른 속도로 아래(또는 뒤)로 빠져나갑니다. = 작용</p>
+        </div>
+        <div class="step-card">
+          <div class="step-card-h">
+            <div class="step-num">3</div>
+            <div class="step-card-t">로켓은 반대로 ↑</div>
+          </div>
+          <p>공기가 받은 힘과 같은 크기의 힘이 반대 방향으로 로켓에 작용해 위로 발사돼요. = 반작용</p>
+        </div>
+      </div>
+
+      <div class="launch-zone" id="launchZone">
+        <svg class="rocket-svg" id="rocketSvg" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+          <!-- nose cone -->
+          <path d="M20 2 L30 22 L10 22 Z" fill="#F26B38"/>
+          <!-- body -->
+          <rect x="10" y="22" width="20" height="30" fill="#FBA774"/>
+          <!-- window -->
+          <circle cx="20" cy="32" r="3.5" fill="#0F2A47"/>
+          <circle cx="20" cy="32" r="2" fill="#F5C242"/>
+          <!-- fins -->
+          <path d="M10 52 L4 60 L10 60 Z" fill="#0F2A47"/>
+          <path d="M30 52 L36 60 L30 60 Z" fill="#0F2A47"/>
+          <!-- thrust opening -->
+          <rect x="14" y="52" width="12" height="6" fill="#36454F"/>
+        </svg>
+        <span class="force-label up" id="forceUp" style="bottom: 5cqw; left: 36%;">⬆ 반작용 (로켓)</span>
+        <span class="force-label down" id="forceDown" style="bottom: 1.5cqw; left: 36%;">⬇ 작용 (공기)</span>
+        <div class="launch-controls">
+          <button class="launch-btn" id="launchBtn">🚀 발사!</button>
+          <button class="reset-btn" id="resetBtn">다시</button>
+        </div>
+      </div>
+
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ 2: Newton 3rd Law ============ -->
+  <section class="slide quiz-slide">
+    <div class="slide-inner">
+      <div class="bg-circle-1"></div>
+      <div class="bg-circle-2"></div>
+      <span class="tag" style="color:var(--yellow);">QUIZ TIME</span>
+      <div class="quiz-question">로켓이 하늘 위로 날아오르려면<br>공기를 어느 방향으로 내뿜어야 할까요?</div>
+      <div class="quiz-options" id="q2-options">
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q2')"><span class="q-letter">A</span>위쪽으로 내뿜는다</button>
+        <button class="quiz-btn" data-correct="true"  onclick="quizClick(this,'q2')"><span class="q-letter">B</span>아래쪽으로 내뿜는다</button>
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q2')"><span class="q-letter">C</span>옆으로 내뿜는다</button>
+        <button class="quiz-btn" data-correct="false" onclick="quizClick(this,'q2')"><span class="q-letter">D</span>방향은 상관없다</button>
+      </div>
+      <div class="quiz-feedback" id="q2-feedback"></div>
+      <button class="quiz-reset" id="q2-reset" onclick="quizReset('q2')">다시 풀기</button>
+      <div class="footer" style="color:rgba(255,255,255,0.4)"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 10: Speed ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">이론 05</span>
+      <h1 class="slide-title">물체의 속력은 무엇이 결정할까?</h1>
+      <p class="slide-sub">압력이 클수록, 작용 시간이 길수록 더 빨리 날아가요</p>
+
+      <div class="two-col">
+        <div class="speed-left">
+          <div class="sec">
+            <div class="lbl">속력 (v)</div>
+            <div class="eq"><span>v = </span><span class="var">거리 / 시간</span></div>
+            <div class="sub">단위: m/s (미터매초)</div>
+          </div>
+          <div class="hr"></div>
+          <div class="sec">
+            <div class="lbl">충격량과 운동량</div>
+            <div class="eq">F · t  =  m · v</div>
+            <div class="sub">힘 × 시간 = 질량 × 속도 변화</div>
+            <div class="arrow-note">→ 같은 로켓이라도 미는 힘이 크고 길수록 더 빨라져요</div>
+          </div>
+        </div>
+        <div>
+          <div class="col-h">로켓런처의 속력을 좌우하는 3요소</div>
+          <div class="factor-card">
+            <div class="ficon">🔺</div>
+            <div><div class="ft">압축 압력의 크기</div><div class="fd">공기를 강하게 압축할수록 분출 속도가 빨라집니다.</div></div>
+          </div>
+          <div class="factor-card">
+            <div class="ficon">📏</div>
+            <div><div class="ft">발사관의 길이</div><div class="fd">관이 길수록 가속되는 시간이 늘어나 속도가 커져요.</div></div>
+          </div>
+          <div class="factor-card">
+            <div class="ficon">🚀</div>
+            <div><div class="ft">로켓의 질량</div><div class="fd">가벼울수록 같은 힘으로 더 빠르게 가속됩니다.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ ROCKET SIMULATOR ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">인터랙티브 실험</span>
+      <h1 class="slide-title">로켓 발사 시뮬레이터</h1>
+      <p class="slide-sub">압력을 바꿔서 로켓이 얼마나 높이 날아가는지 비교해 봐요!</p>
+      <div class="rocket-sim-layout">
+        <div class="sim-controls">
+          <div>
+            <div class="sim-label">발사 압력 (기압)</div>
+            <div class="sim-slider-row">
+              <input type="range" class="sim-slider" id="simPressure" min="1" max="5" step="0.5" value="2">
+              <span class="sim-val" id="simPressureVal">2.0</span>
+            </div>
+          </div>
+          <div>
+            <div class="sim-label">발사 각도 (°)</div>
+            <div class="sim-slider-row">
+              <input type="range" class="sim-slider" id="simAngle" min="30" max="85" step="5" value="70">
+              <span class="sim-val" id="simAngleVal">70°</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.6cqw;">
+            <button class="sim-launch-btn" id="simLaunchBtn" style="flex:1">🚀 발사!</button>
+            <button class="sim-launch-btn" id="simResetBtn" style="background:var(--navy);flex:0 0 auto;font-size:1.2cqw;padding:0.9cqw 1.2cqw;" title="기록 초기화">↺</button>
+          </div>
+          <div class="sim-record">
+            <div class="sim-record-title">발사 기록 <span id="simRecordCount" style="font-weight:400;color:var(--text-light);font-size:0.85cqw">(0 / 10)</span></div>
+            <ul class="sim-record-list" id="simRecordList">
+              <li style="color:var(--text-light);font-size:0.9cqw">아직 발사 기록이 없어요.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sim-canvas-wrap">
+          <canvas id="rocketSimCanvas"></canvas>
+          <div class="sim-height-badge" id="simHeightBadge">높이: — m &nbsp;|&nbsp; 거리: — m</div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11: Parts ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">실습 01</span>
+      <h1 class="slide-title">키트 구성품을 확인해요</h1>
+      <p class="slide-sub">박스를 열기 전, 어떤 부품이 어떤 역할을 하는지 미리 살펴봐요</p>
+
+      <div class="grid parts-grid">
+        <div class="part-card"><div class="part-num">①</div><div class="part-h">발사관 (런처 튜브)</div><div class="part-d">공기가 압축됐다가 빠져나가는 통로. 보일의 법칙이 작동하는 핵심 공간이에요.</div></div>
+        <div class="part-card"><div class="part-num">②</div><div class="part-h">압축부 (펌프/누름판)</div><div class="part-d">외부 공기를 가두고 부피를 줄여 압력을 높이는 부분.</div></div>
+        <div class="part-card"><div class="part-num">③</div><div class="part-h">로켓 본체</div><div class="part-d">발사관 위에 끼우는 가벼운 발사체. 머리(콘), 몸통, 꼬리 날개로 구성.</div></div>
+        <div class="part-card"><div class="part-num">④</div><div class="part-h">꼬리 날개 (핀)</div><div class="part-d">비행 중 공기 저항을 이용해 로켓이 똑바로 날아가도록 잡아 줍니다.</div></div>
+        <div class="part-card"><div class="part-num">⑤</div><div class="part-h">받침대 / 발사 각도 조절</div><div class="part-d">안전한 발사 방향과 각도를 정해 주는 받침. 보통 30°~60° 사이로 조절.</div></div>
+        <div class="part-card"><div class="part-num">⑥</div><div class="part-h">조립 설명서 · 안전 안내</div><div class="part-d">부품 목록과 단계별 조립 방법, 주의사항이 적혀 있어요.</div></div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 12: Safety ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">실습 02 · 필수</span>
+      <h1 class="slide-title">제작 전, 꼭 지켜야 할 안전 수칙</h1>
+      <p class="slide-sub">재미있는 실험일수록 안전이 최우선이에요</p>
+
+      <div class="warn-banner">
+        <span class="warn-icon">⚠</span>
+        <span>로켓런처는 압축공기로 빠르게 발사돼요. 사람·동물·창문을 향해 절대 쏘지 마세요.</span>
+      </div>
+
+      <div class="grid grid-3" style="gap: 0.8cqw;">
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">보안경 착용</div><div class="cd">조립과 발사 모두 보호 안경을 쓰고 진행해요.</div></div></div>
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">발사 방향 확인</div><div class="cd">주변에 사람이 없는 공간(운동장·복도)에서, 위쪽을 향해 쏴요.</div></div></div>
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">발사 각도 30°~60°</div><div class="cd">수평·수직 발사 금지. 멀리 날리고 싶다면 약 45°가 적당해요.</div></div></div>
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">기기 점검</div><div class="cd">발사관 균열, 누수, 부품 헐거움이 없는지 매 발사 전에 확인해요.</div></div></div>
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">압축 한도 지키기</div><div class="cd">키트 설명서에 적힌 최대 압력(펌프 횟수)을 절대 넘기지 마세요.</div></div></div>
+        <div class="check-card"><div class="cb">✓</div><div><div class="ct">정리정돈</div><div class="cd">발사된 로켓은 한 번에 한 사람씩 가져오기. 떨어진 부품 즉시 줍기.</div></div></div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 13: Assembly Steps ============ -->
+  <section class="slide slide-steps">
+    <div class="slide-inner">
+      <span class="tag">실습 03</span>
+      <h1 class="slide-title">단계별 조립 가이드</h1>
+      <p class="slide-sub">5단계로 차근차근 — 한 단계가 끝날 때마다 손을 들어 확인해요</p>
+
+      <div class="step-row"><div class="sn">STEP 1</div><div class="st">부품 분류</div><div class="sd">조립 설명서를 펴고 모든 부품이 다 있는지 체크리스트로 확인해요.</div><div class="stime">⏱ 5분</div></div>
+      <div class="step-row"><div class="sn">STEP 2</div><div class="st">발사대 조립</div><div class="sd">받침대에 발사관을 단단히 결합하고, 각도 조절부가 부드럽게 움직이는지 확인해요.</div><div class="stime">⏱ 8분</div></div>
+      <div class="step-row"><div class="sn">STEP 3</div><div class="st">압축 펌프 연결</div><div class="sd">압축부(펌프 또는 누름판)를 발사관과 연결하고, 공기가 새지 않도록 조여 줍니다.</div><div class="stime">⏱ 7분</div></div>
+      <div class="step-row"><div class="sn">STEP 4</div><div class="st">로켓 본체 제작</div><div class="sd">몸통에 꼬리 날개 3~4개를 균등한 간격으로 부착하고, 머리 부분(콘)을 끼워요.</div><div class="stime">⏱ 10분</div></div>
+      <div class="step-row"><div class="sn">STEP 5</div><div class="st">리허설 발사</div><div class="sd">낮은 압력으로 안전한 방향에 시범 발사해 누설이나 흔들림이 없는지 확인해요.</div><div class="stime">⏱ 5분</div></div>
+
+      <div class="step-foot">💡 총 소요 시간 약 35분 — 충분히 여유 있게 진행하고, 어려운 단계는 짝과 함께 도와요.</div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 14: Integration ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">원리 통합</span>
+      <h1 class="slide-title">로켓런처는 어떻게 날아갈까?</h1>
+      <p class="slide-sub">오늘 배운 모든 개념이 한 번에 작동하는 순간</p>
+
+      <div class="flow" style="grid-template-columns: 1fr 0.5fr 1fr 0.5fr 1fr 0.5fr 1fr;">
+        <div class="flow-card c1">
+          <div class="fc-num">1</div>
+          <div class="fc-t">공기 압축</div>
+          <div class="fc-s">P↑  V↓</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-card c2">
+          <div class="fc-num">2</div>
+          <div class="fc-t">압력 폭발적 증가</div>
+          <div class="fc-s">보일의 법칙</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-card c3">
+          <div class="fc-num">3</div>
+          <div class="fc-t">공기 분출 (작용)</div>
+          <div class="fc-s">분자가 아래로 빠짐</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-card c1">
+          <div class="fc-num">4</div>
+          <div class="fc-t">로켓 발사 (반작용)</div>
+          <div class="fc-s">F·t = m·v</div>
+        </div>
+      </div>
+
+      <div class="summary-banner">
+        <div class="sb-lbl">핵심 정리</div>
+        <div class="sb-t"><b>보일의 법칙</b>이 만든 <b>압력</b>이, <b>작용·반작용</b>을 통해 <b>운동량</b>으로 바뀌고, 로켓의 <b>속력</b>을 만듭니다.</div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 15: Experiment ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">실습 04 · 실험</span>
+      <h1 class="slide-title">변인을 바꿔서 비교해 봐요</h1>
+      <p class="slide-sub">과학자처럼 한 번에 하나씩만 바꾸는 게 핵심!</p>
+
+      <div class="exp-row">
+        <div class="hyp-box">
+          <div class="hyp-lbl">실험 가설</div>
+          <div class="hyp-q">어떤 변인이 로켓을 가장 멀리 날아가게 할까?</div>
+          <div class="var-list">
+            <div class="vt">통제 변인</div>
+            <div class="vd">→ 로켓 종류, 발사 장소, 풍향</div>
+            <div class="vt">조작 변인</div>
+            <div class="vd">→ 펌프 횟수 / 발사 각도 / 로켓 무게</div>
+            <div class="vt">종속 변인</div>
+            <div class="vd">→ 비행 거리, 도달 높이, 비행 시간</div>
+          </div>
+        </div>
+        <div>
+          <div class="career-right-h">실험 기록표 (예시)</div>
+          <table class="exp-table">
+            <thead><tr><th>회차</th><th>펌프 횟수</th><th>발사 각도</th><th>거리 (m)</th><th>관찰</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>5회</td><td>45°</td><td class="ph">_____</td><td></td></tr>
+              <tr><td>2</td><td>10회</td><td>45°</td><td class="ph">_____</td><td></td></tr>
+              <tr><td>3</td><td>10회</td><td>30°</td><td class="ph">_____</td><td></td></tr>
+              <tr><td>4</td><td>10회</td><td>60°</td><td class="ph">_____</td><td></td></tr>
+            </tbody>
+          </table>
+          <div class="exp-foot">💭 각도가 같을 때 펌프 횟수가 늘면 거리는 어떻게 변하나요? | 같은 펌프 횟수에서 어느 각도가 가장 멀리?</div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 16: Real-world apps ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="tag">응용 01</span>
+      <h1 class="slide-title">실제 세상에서는 어떻게 쓰일까?</h1>
+      <p class="slide-sub">오늘 만든 키트의 원리가 진짜 우주까지 닿아요</p>
+
+      <div class="grid grid-2">
+        <div class="app-card">
+          <div class="ai-circle">🚀</div>
+          <div><div class="at">실제 우주 로켓</div><div class="ad">연료를 빠르게 태워 만든 고온·고압의 가스를 노즐 뒤로 분출해 추진력을 얻습니다. 원리는 같지만 스케일이 다를 뿐이에요.</div></div>
+        </div>
+        <div class="app-card">
+          <div class="ai-circle">💧</div>
+          <div><div class="at">물로켓 대회</div><div class="ad">페트병에 물과 압축공기를 넣고 발사하는 과학 대회 종목. 물의 무게가 더해져 작용·반작용 효과가 커집니다.</div></div>
+        </div>
+        <div class="app-card">
+          <div class="ai-circle">🎯</div>
+          <div><div class="at">공압 시스템(산업)</div><div class="ad">공장의 자동 도장기, 못 박는 네일건, 자동차 정비소의 공기 임팩트 등 모두 압축공기를 쓰는 도구예요.</div></div>
+        </div>
+        <div class="app-card">
+          <div class="ai-circle">🏥</div>
+          <div><div class="at">의료·구조 장비</div><div class="ad">인공호흡기, 의료용 분무기(네뷸라이저), 구조용 공기쿠션 모두 보일의 법칙을 활용합니다.</div></div>
+        </div>
+      </div>
+      <div class="footer"><span>로켓런처 · 보일의 법칙</span><span class="pn"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 17: Wrap up ============ -->
+  <section class="slide slide-dark">
+    <div class="slide-inner">
+      <div class="bg-blob1"></div>
+      <div class="bg-blob2"></div>
+      <span class="tag">WRAP UP</span>
+      <h1 class="slide-title">오늘 우리가 배운 것</h1>
+
+      <div class="sum-grid">
+        <div class="sum-card">
+          <div class="sum-big">P·V</div>
+          <div class="sum-small">보일의 법칙</div>
+          <div class="sum-desc">온도가 같다면, 압력과 부피는<br>곱이 일정한 반비례 관계.</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-big">F·t</div>
+          <div class="sum-small">충격량과 속력</div>
+          <div class="sum-desc">큰 힘이 오래 작용할수록<br>물체의 속력 변화가 커진다.</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-big">↑↓</div>
+          <div class="sum-small">작용·반작용</div>
+          <div class="sum-desc">공기를 아래로 밀면<br>로켓은 위로 날아간다.</div>
+        </div>
+      </div>
+
+      <div class="wrap-rule"></div>
+      <div>
+        <span class="wrap-next">다음 시간 예고</span>
+        <span class="wrap-next-d">— 내가 만든 로켓을 더 멀리 날리기 위한 '개선 설계' 발표회를 열어 봅니다.</span>
+      </div>
+      <div class="wrap-q">질문 있나요? 궁금한 점은 언제든 손을 들어 주세요 🙋</div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <button id="prevBtn" aria-label="이전">‹</button>
+  <span class="counter" id="counter">01 / 18</span>
+  <button id="nextBtn" aria-label="다음">›</button>
+  <button class="fs-btn" id="fsBtn" aria-label="전체화면" title="전체화면">⛶</button>
+</nav>
+
+<script>
+  // ============ Slide navigation ============
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const fsBtn = document.getElementById('fsBtn');
+  let idx = 0;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function show(i) {
+    idx = Math.max(0, Math.min(total - 1, i));
+    slides.forEach((s, j) => {
+      s.classList.remove('active', 'prev');
+      if (j === idx) s.classList.add('active');
+      else if (j < idx) s.classList.add('prev');
+    });
+    counter.textContent = `${pad(idx + 1)} / ${pad(total)}`;
+    progress.style.width = `${((idx + 1) / total) * 100}%`;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === total - 1;
+    // Update page numbers in footers
+    document.querySelectorAll('.pn').forEach((el, j) => {
+      el.textContent = `${pad(idx + 1)} / ${pad(total)}`;
+    });
+    // Trigger slide-specific interactive features
+    onSlideChange(idx);
+  }
+
+  function onSlideChange(i) {
+    // Slide 4 (idx 3): animated gas molecules
+    if (i === 3) slide4Anim?.start(); else slide4Anim?.stop();
+    // Slide 5 (idx 4): pressure visualization with wall hits
+    if (i === 4) slide5Anim?.start(); else slide5Anim?.stop();
+    // Slide 6 (idx 5): Boyle's law piston simulator
+    if (i === 5) pistonAnim?.start(); else pistonAnim?.stop();
+    // Slide 16 (idx 15): staggered reveal of step rows (shifted by 3 due to new slides)
+    const stepsSlide = document.querySelector('.slide-steps');
+    if (stepsSlide) {
+      if (i === 15) {
+        stepsSlide.classList.remove('revealed');
+        // Force reflow to restart animation
+        void stepsSlide.offsetWidth;
+        stepsSlide.classList.add('revealed');
+      } else {
+        stepsSlide.classList.remove('revealed');
+      }
+    }
+  }
+
+  prevBtn.addEventListener('click', () => show(idx - 1));
+  nextBtn.addEventListener('click', () => show(idx + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      show(idx + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      show(idx - 1);
+    } else if (e.key === 'Home') {
+      show(0);
+    } else if (e.key === 'End') {
+      show(total - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) show(idx + 1);
+      else show(idx - 1);
+    }
+  });
+
+  // Fullscreen
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+  fsBtn.addEventListener('click', toggleFullscreen);
+
+  // ============ INTERACTIVE: Animated molecules (Slide 4 & 5) ============
+  function setupMoleculeAnimation(containerId, count, withArrows) {
+    const box = document.getElementById(containerId);
+    if (!box) return null;
+
+    const molecules = [];
+    for (let i = 0; i < count; i++) {
+      const m = document.createElement('div');
+      m.className = 'molecule';
+      m.style.left = '0px'; m.style.top = '0px';
+      m.style.transition = 'none';
+      box.appendChild(m);
+      molecules.push({
+        el: m,
+        x: Math.random() * 80 + 5,
+        y: Math.random() * 80 + 5,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+      });
+    }
+
+    // Arrows hitting right wall (slide 5)
+    let hitCount = 0;
+    if (withArrows) {
+      for (let i = 0; i < 4; i++) {
+        const a = document.createElement('div');
+        a.className = 'arrow';
+        a.style.top = (15 + i * 22) + '%';
+        box.appendChild(a);
+      }
+    }
+
+    let running = false;
+    let rafId = null;
+
+    function step() {
+      molecules.forEach(m => {
+        m.x += m.vx;
+        m.y += m.vy;
+        // Bounce off walls (box is 0..100 in %)
+        if (m.x < 2) { m.x = 2; m.vx *= -1; if (withArrows) hitWall(m, 'left'); }
+        if (m.x > 95) { m.x = 95; m.vx *= -1; if (withArrows) hitWall(m, 'right'); }
+        if (m.y < 2) { m.y = 2; m.vy *= -1; }
+        if (m.y > 92) { m.y = 92; m.vy *= -1; }
+        m.el.style.left = m.x + '%';
+        m.el.style.top = m.y + '%';
+      });
+      if (running) rafId = requestAnimationFrame(step);
+    }
+
+    function hitWall(m, side) {
+      if (side === 'right') {
+        hitCount++;
+        // flash the molecule briefly
+        m.el.style.background = 'var(--yellow)';
+        setTimeout(() => { m.el.style.background = ''; }, 100);
+      }
+    }
+
+    let speedMult = 1;
+
+    return {
+      start: () => { if (!running) { running = true; step(); } },
+      stop: () => { running = false; if (rafId) cancelAnimationFrame(rafId); },
+      setSpeed: (mult) => {
+        // Rescale all velocities
+        const newMult = mult / speedMult;
+        molecules.forEach(m => { m.vx *= newMult; m.vy *= newMult; });
+        speedMult = mult;
+      },
+    };
+  }
+
+  const slide4Anim = setupMoleculeAnimation('mbox', 14, false);
+  const slide5Anim = setupMoleculeAnimation('pvis', 12, true);
+
+  // ============ INTERACTIVE: Boyle's Law Piston (Slide 6) ============
+  function setupPiston() {
+    const slider = document.getElementById('pistonSlider');
+    const piston = document.getElementById('syringePiston');
+    const chamber = document.getElementById('syringeChamber');
+    const syringe = document.getElementById('syringe');
+    const rV = document.getElementById('rV');
+    const rP = document.getElementById('rP');
+    const rPV = document.getElementById('rPV');
+    const rVbar = document.getElementById('rVbar');
+    const rPbar = document.getElementById('rPbar');
+    if (!slider) return;
+
+    // Create molecules in syringe
+    const MOL_COUNT = 16;
+    const mols = [];
+    for (let i = 0; i < MOL_COUNT; i++) {
+      const m = document.createElement('div');
+      m.className = 'syringe-mol';
+      syringe.appendChild(m);
+      mols.push({
+        el: m,
+        x: 5 + Math.random() * 70,  // % of syringe width
+        y: 10 + Math.random() * 80,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+      });
+    }
+
+    const PV_CONST = 10000;  // P × V = 10000
+
+    function update(v) {
+      // v: 20..95 (volume percentage of full syringe)
+      const p = PV_CONST / v;
+      // Display values: rescale V to 0–100, P proportional
+      rV.textContent = Math.round(v);
+      rP.textContent = Math.round(p);
+      rPV.textContent = Math.round(v * p).toLocaleString();
+
+      // Position piston: v=95 → piston at far right, v=20 → far left
+      const pistonPct = v;  // chamber width %
+      piston.style.left = `calc(${pistonPct}% - 0.4cqw)`;
+      chamber.style.width = `${pistonPct}%`;
+
+      // Bar fills
+      rVbar.style.width = `${v}%`;
+      // Map P to bar: P range ~ 100 (when v=100) to 500 (when v=20). Normalize to 0-100%.
+      const pBarPct = Math.min(100, (p / 500) * 100);
+      rPbar.style.width = `${pBarPct}%`;
+    }
+
+    slider.addEventListener('input', () => update(+slider.value));
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = +btn.dataset.v;
+        slider.value = v;
+        update(v);
+      });
+    });
+
+    // Animate molecules inside the visible chamber
+    let running = false;
+    let rafId = null;
+    function step() {
+      const v = +slider.value;
+      // chamber is from x=0% to x=v% of syringe
+      mols.forEach((m, i) => {
+        m.x += m.vx;
+        m.y += m.vy;
+        // Right wall is at v - 2 (leaving margin)
+        const rightBound = v - 5;
+        if (m.x < 3) { m.x = 3; m.vx *= -1; }
+        if (m.x > rightBound) { m.x = rightBound; m.vx *= -1; }
+        if (m.y < 5) { m.y = 5; m.vy *= -1; }
+        if (m.y > 88) { m.y = 88; m.vy *= -1; }
+        m.el.style.left = m.x + '%';
+        m.el.style.top = m.y + '%';
+      });
+      if (running) rafId = requestAnimationFrame(step);
+    }
+
+    update(80);
+
+    return {
+      start: () => { if (!running) { running = true; step(); } },
+      stop: () => { running = false; if (rafId) cancelAnimationFrame(rafId); },
+    };
+  }
+  const pistonAnim = setupPiston();
+
+  // ============ INTERACTIVE: Boyle Curve hover (Slide 7) ============
+  function setupBoyleHover() {
+    const svg = document.getElementById('boyleSvg');
+    const chartCard = document.getElementById('chartCard');
+    const hoverGroup = document.getElementById('boyleHover');
+    const hoverPoint = document.getElementById('hoverPoint');
+    const hoverVLine = document.getElementById('hoverVLine');
+    const hoverHLine = document.getElementById('hoverHLine');
+    const readout = document.getElementById('hoverReadout');
+    if (!svg) return;
+
+    function getSvgPoint(evt) {
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function update(svgX, clientX, clientY) {
+      // SVG x range: 60..580 → V from 1 to 10
+      const v = Math.max(1, Math.min(10, 1 + (svgX - 60) / (520 / 9)));
+      const p = 100 / v;
+      // Plot to SVG y: y = 320 - p*2
+      const cx = 60 + (v - 1) * (520 / 9);
+      const cy = 320 - p * 2;
+      hoverPoint.setAttribute('cx', cx);
+      hoverPoint.setAttribute('cy', cy);
+      hoverVLine.setAttribute('x1', cx); hoverVLine.setAttribute('x2', cx);
+      hoverVLine.setAttribute('y1', cy); hoverVLine.setAttribute('y2', 320);
+      hoverHLine.setAttribute('y1', cy); hoverHLine.setAttribute('y2', cy);
+      hoverHLine.setAttribute('x1', 60); hoverHLine.setAttribute('x2', cx);
+      hoverGroup.classList.add('active');
+
+      readout.textContent = `V=${v.toFixed(1)} · P=${p.toFixed(1)} · P×V=${(v*p).toFixed(0)}`;
+      const cardRect = chartCard.getBoundingClientRect();
+      readout.style.left = (clientX - cardRect.left) + 'px';
+      readout.style.top = (clientY - cardRect.top) + 'px';
+      readout.classList.add('active');
+    }
+
+    svg.addEventListener('mousemove', (e) => {
+      const p = getSvgPoint(e);
+      if (p.x >= 60 && p.x <= 580 && p.y >= 40 && p.y <= 320) {
+        update(p.x, e.clientX, e.clientY);
+      } else {
+        hoverGroup.classList.remove('active');
+        readout.classList.remove('active');
+      }
+    });
+    svg.addEventListener('mouseleave', () => {
+      hoverGroup.classList.remove('active');
+      readout.classList.remove('active');
+    });
+    // Touch support
+    svg.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      const p = getSvgPoint(t);
+      if (p.x >= 60 && p.x <= 580 && p.y >= 40 && p.y <= 320) {
+        update(p.x, t.clientX, t.clientY);
+      }
+    });
+  }
+  setupBoyleHover();
+
+  // ============ INTERACTIVE: Rocket launch (Slide 9) ============
+  function setupRocketLaunch() {
+    const btn = document.getElementById('launchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const rocket = document.getElementById('rocketSvg');
+    const zone = document.getElementById('launchZone');
+    const fUp = document.getElementById('forceUp');
+    const fDown = document.getElementById('forceDown');
+    if (!btn) return;
+
+    let launching = false;
+    let smokes = [];
+
+    function reset() {
+      launching = false;
+      rocket.style.transform = '';
+      rocket.style.bottom = '1.2cqw';
+      smokes.forEach(s => s.remove());
+      smokes = [];
+      fUp.classList.remove('show');
+      fDown.classList.remove('show');
+      btn.disabled = false;
+      btn.textContent = '🚀 발사!';
+    }
+
+    function launch() {
+      if (launching) return;
+      launching = true;
+      btn.disabled = true;
+      btn.textContent = '발사 중…';
+
+      // Show force labels
+      fDown.classList.add('show');
+      setTimeout(() => fUp.classList.add('show'), 100);
+
+      const startTime = performance.now();
+      const duration = 1800;
+
+      function spawnSmoke() {
+        if (!launching) return;
+        const s = document.createElement('div');
+        s.className = 'smoke';
+        const rect = rocket.getBoundingClientRect();
+        const zoneRect = zone.getBoundingClientRect();
+        s.style.left = (rect.left - zoneRect.left + rect.width/2 - 6) + 'px';
+        s.style.bottom = '1cqw';
+        zone.appendChild(s);
+        smokes.push(s);
+        let opacity = 0.6;
+        let dy = 0;
+        const smokeInterval = setInterval(() => {
+          opacity -= 0.04;
+          dy += 1.5;
+          s.style.opacity = opacity;
+          s.style.transform = `translate(${(Math.random()-0.5)*8}px, ${dy}px) scale(${1 + dy/40})`;
+          if (opacity <= 0) {
+            clearInterval(smokeInterval);
+            s.remove();
+            smokes = smokes.filter(x => x !== s);
+          }
+        }, 40);
+      }
+      const smokeTimer = setInterval(spawnSmoke, 60);
+
+      function frame(now) {
+        const t = (now - startTime) / duration;
+        if (t >= 1) {
+          clearInterval(smokeTimer);
+          btn.textContent = '🚀 다시 발사!';
+          btn.disabled = false;
+          launching = false;
+          return;
+        }
+        // Ease-out cubic for the rocket
+        const eased = 1 - Math.pow(1 - t, 3);
+        const lift = eased * 200;  // px
+        rocket.style.transform = `translateY(-${lift}%)`;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    btn.addEventListener('click', launch);
+    resetBtn.addEventListener('click', reset);
+  }
+  setupRocketLaunch();
+
+  // ============ Render Boyle curve on Slide 7 (existing logic) ============
+  const curve = document.getElementById('boyleCurve');
+  const dots = document.getElementById('boyleDots');
+  if (curve) {
+    // P = 100 / V,  V from 1 to 10
+    // X mapping: V=1 -> 60, V=10 -> 580. So x = 60 + (V-1) * (580-60)/9 = 60 + (V-1)*57.78
+    // Y mapping: P=0 -> 320, P=120 -> 80. So y = 320 - P * (320-80)/120 = 320 - P*2
+    const points = [];
+    for (let v = 1; v <= 10; v += 0.25) {
+      const p = 100 / v;
+      const x = 60 + (v - 1) * (520 / 9);
+      const y = 320 - p * 2;
+      points.push([x, y]);
+    }
+    const d = points.map((pt, i) => (i === 0 ? 'M' : 'L') + pt[0].toFixed(1) + ',' + pt[1].toFixed(1)).join(' ');
+    curve.setAttribute('d', d);
+
+    // Dots at integer V values
+    for (let v = 1; v <= 10; v++) {
+      const p = 100 / v;
+      const x = 60 + (v - 1) * (520 / 9);
+      const y = 320 - p * 2;
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', x.toFixed(1));
+      c.setAttribute('cy', y.toFixed(1));
+      c.setAttribute('r', '3.5');
+      dots.appendChild(c);
+    }
+  }
+
+  // ============ QUIZ SYSTEM ============
+  const quizAnswers = {
+    q1: { correct: null, feedbackOk: '🎉 정답! 보일의 법칙: V가 1/2배 → P가 2배. P × V = 일정하니까요!', feedbackNo: '❌ 다시 생각해봐요. P × V = 일정 — 부피가 줄면 압력은 반드시 늘어나요.' },
+    q2: { correct: null, feedbackOk: '🎉 정답! 공기를 아래로 → 로켓이 위로 — 작용·반작용이에요!', feedbackNo: '❌ 뉴턴의 제3법칙! 작용(공기를 아래로)과 반작용(로켓이 위로)은 항상 반대 방향이에요.' },
+  };
+
+  function quizClick(btn, quizId) {
+    const options = document.getElementById(quizId + '-options');
+    if (!options) return;
+    // Prevent double click
+    if (options.dataset.answered) return;
+    options.dataset.answered = 'yes';
+
+    const allBtns = options.querySelectorAll('.quiz-btn');
+    const isCorrect = btn.dataset.correct === 'true';
+    allBtns.forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+      else if (b === btn && !isCorrect) b.classList.add('wrong');
+    });
+
+    const feedback = document.getElementById(quizId + '-feedback');
+    const info = quizAnswers[quizId];
+    feedback.textContent = isCorrect ? info.feedbackOk : info.feedbackNo;
+    feedback.className = 'quiz-feedback show ' + (isCorrect ? 'ok' : 'no');
+
+    const resetBtn = document.getElementById(quizId + '-reset');
+    if (resetBtn) resetBtn.classList.add('show');
+
+    // Confetti-like burst if correct
+    if (isCorrect) spawnConfetti(btn);
+  }
+
+  function quizReset(quizId) {
+    const options = document.getElementById(quizId + '-options');
+    if (!options) return;
+    delete options.dataset.answered;
+    const allBtns = options.querySelectorAll('.quiz-btn');
+    allBtns.forEach(b => { b.disabled = false; b.classList.remove('correct', 'wrong'); });
+    const feedback = document.getElementById(quizId + '-feedback');
+    feedback.className = 'quiz-feedback';
+    const resetBtn = document.getElementById(quizId + '-reset');
+    if (resetBtn) resetBtn.classList.remove('show');
+  }
+
+  function spawnConfetti(originEl) {
+    const rect = originEl.getBoundingClientRect();
+    const colors = ['#F26B38', '#F5C242', '#2D7A8C', '#22c55e', '#a78bfa'];
+    for (let i = 0; i < 30; i++) {
+      const c = document.createElement('div');
+      c.style.cssText = `
+        position:fixed;
+        left:${rect.left + rect.width/2}px;
+        top:${rect.top + rect.height/2}px;
+        width:${6 + Math.random()*8}px;
+        height:${6 + Math.random()*8}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+        pointer-events:none;
+        z-index:9999;
+        transform:translate(-50%,-50%);
+        transition: transform 1s ease-out, opacity 1s ease-out;
+      `;
+      document.body.appendChild(c);
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 160;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist - 60;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          c.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${Math.random()*360}deg)`;
+          c.style.opacity = '0';
+        });
+      });
+      setTimeout(() => c.remove(), 1100);
+    }
+  }
+
+  // ============ ROCKET SIMULATOR ============
+  function setupRocketSim() {
+    const canvas = document.getElementById('rocketSimCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const pressureSlider = document.getElementById('simPressure');
+    const angleSlider = document.getElementById('simAngle');
+    const pressureVal = document.getElementById('simPressureVal');
+    const angleVal = document.getElementById('simAngleVal');
+    const launchBtn = document.getElementById('simLaunchBtn');
+    const recordList = document.getElementById('simRecordList');
+    const heightBadge = document.getElementById('simHeightBadge');
+
+    let records = [];
+    let animId = null;
+    let launching = false;
+    const recordCount = document.getElementById('simRecordCount');
+    const resetBtn = document.getElementById('simResetBtn');
+
+    const COLORS = ['#F26B38', '#F5C242', '#2D7A8C', '#22c55e', '#a78bfa', '#f472b6'];
+
+    function resizeCanvas() {
+      const wrap = canvas.parentElement;
+      canvas.width = wrap.clientWidth;
+      canvas.height = wrap.clientHeight;
+      drawScene(null, records);
+    }
+
+    pressureSlider.addEventListener('input', () => {
+      pressureVal.textContent = (+pressureSlider.value).toFixed(1);
+    });
+    angleSlider.addEventListener('input', () => {
+      angleVal.textContent = angleSlider.value + '°';
+    });
+
+    function drawBackground() {
+      const W = canvas.width, H = canvas.height;
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.85);
+      skyGrad.addColorStop(0, '#4A90D9');
+      skyGrad.addColorStop(1, '#87CEEB');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, W, H * 0.85);
+
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      [[0.15,0.1],[0.5,0.06],[0.8,0.13]].forEach(([xf,yf]) => {
+        const cx = W * xf, cy = H * yf, r = W * 0.04;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + r*0.8, cy + r*0.3, r*0.75, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx - r*0.7, cy + r*0.25, r*0.65, 0, Math.PI*2); ctx.fill();
+      });
+
+      // Ground
+      const gGrad = ctx.createLinearGradient(0, H*0.85, 0, H);
+      gGrad.addColorStop(0, '#6DB340');
+      gGrad.addColorStop(1, '#4A7A2A');
+      ctx.fillStyle = gGrad;
+      ctx.fillRect(0, H * 0.85, W, H * 0.15);
+
+      // Height grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 6]);
+      for (let h = 20; h <= 100; h += 20) {
+        const y = H * 0.85 - (H * 0.83 * h / 110);
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(W, y);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = `${Math.max(10, W * 0.02)}px monospace`;
+        ctx.fillText(h + 'm', 4, y - 3);
+      }
+      ctx.setLineDash([]);
+    }
+
+    function worldToCanvas(wx, wy, maxH, maxX) {
+      const W = canvas.width, H = canvas.height;
+      const groundY = H * 0.85;
+      const skyH = H * 0.83;
+      const scale = skyH / 110;
+      return {
+        x: W * 0.08 + wx * (W * 0.84) / maxX,
+        y: groundY - wy * scale,
+      };
+    }
+
+    function computeTrajectory(pressure, angleDeg) {
+      // pressure 1-5 → v0 scaled
+      const v0 = 25 + (pressure - 1) * 18;  // m/s, 25 to 97
+      const angle = angleDeg * Math.PI / 180;
+      const vx = v0 * Math.cos(angle);
+      const vy = v0 * Math.sin(angle);
+      const g = 9.8;
+      const dt = 0.05;
+      const pts = [{x:0, y:0}];
+      let px = 0, py = 0, pvx = vx, pvy = vy;
+      let maxH = 0;
+      for (let t = 0; t < 30; t += dt) {
+        pvx = vx;
+        pvy = vy - g * t;
+        px = vx * t;
+        py = vy * t - 0.5 * g * t * t;
+        if (py < 0 && t > 0.1) break;
+        pts.push({x: px, y: Math.max(0, py)});
+        if (py > maxH) maxH = py;
+      }
+      const maxDist = Math.round(pts[pts.length - 1].x);
+      return { pts, maxH: Math.round(maxH), maxDist, maxX: pts[pts.length-1].x };
+    }
+
+    function drawScene(current, allRecords) {
+      if (!canvas.width) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBackground();
+
+      const fs = Math.max(11, canvas.width * 0.022);
+
+      // Draw past trajectories (faded)
+      allRecords.forEach((rec, i) => {
+        const col = COLORS[i % COLORS.length];
+        const maxH = Math.max(...allRecords.map(r => r.maxH), 110);
+        const maxX = Math.max(...allRecords.map(r => r.pts[r.pts.length-1].x));
+        drawTrajectory(rec.pts, col, 0.4, maxH, maxX);
+
+        // Height label at peak
+        const peak = rec.pts.reduce((a, b) => b.y > a.y ? b : a);
+        const cp = worldToCanvas(peak.x, peak.y, maxH, maxX);
+        ctx.globalAlpha = 0.65;
+        drawLabel(cp.x + 4, cp.y - 6, `↑ ${rec.maxH}m`, col, fs, false);
+
+        // Distance label at landing point
+        const land = rec.pts[rec.pts.length - 1];
+        const lp = worldToCanvas(land.x, land.y, maxH, maxX);
+        drawLabel(lp.x, lp.y - 14, `→ ${rec.maxDist}m`, col, fs, false);
+        ctx.globalAlpha = 1;
+      });
+
+      if (current) {
+        const allH = [...allRecords.map(r => r.maxH), current.maxH, 110];
+        const maxH = Math.max(...allH);
+        const allX = [...allRecords.map(r => r.pts[r.pts.length-1].x), current.pts[current.pts.length-1].x, 1];
+        const maxX = Math.max(...allX);
+        drawTrajectory(current.pts, '#F26B38', 1, maxH, maxX);
+
+        if (current.animPt) {
+          const cp = worldToCanvas(current.animPt.x, current.animPt.y, maxH, maxX);
+          // Rocket dot
+          ctx.fillStyle = '#F26B38';
+          ctx.beginPath();
+          ctx.arc(cp.x, cp.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          // Rocket flame
+          ctx.fillStyle = 'rgba(245,194,66,0.8)';
+          ctx.beginPath();
+          ctx.arc(cp.x, cp.y + 9, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Animation finished — show final height + distance labels
+          const peak = current.pts.reduce((a, b) => b.y > a.y ? b : a);
+          const cp = worldToCanvas(peak.x, peak.y, maxH, maxX);
+          drawLabel(cp.x + 4, cp.y - 6, `↑ ${current.maxH}m`, '#F26B38', fs, true);
+
+          const land = current.pts[current.pts.length - 1];
+          const lp = worldToCanvas(land.x, land.y, maxH, maxX);
+          drawLabel(lp.x, lp.y - 14, `→ ${current.maxDist}m`, '#F26B38', fs, true);
+        }
+      }
+    }
+
+    function drawLabel(x, y, text, color, fontSize, bold) {
+      ctx.save();
+      ctx.font = `${bold ? 900 : 800} ${fontSize}px sans-serif`;
+      // White outline for contrast on any background
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = fontSize * 0.32;
+      ctx.lineJoin = 'round';
+      ctx.strokeText(text, x, y);
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawTrajectory(pts, color, alpha, maxH, maxX) {
+      if (pts.length < 2) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = alpha > 0.6 ? 2.5 : 1.5;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      pts.forEach((pt, i) => {
+        const cp = worldToCanvas(pt.x, pt.y, maxH, maxX);
+        i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
+      });
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function launch() {
+      if (launching) return;
+      launching = true;
+      launchBtn.disabled = true;
+
+      const pressure = +pressureSlider.value;
+      const angle = +angleSlider.value;
+      const traj = computeTrajectory(pressure, angle);
+
+      let ptIdx = 0;
+      const current = { pts: [], maxH: traj.maxH, maxDist: traj.maxDist, animPt: null };
+
+      function frame() {
+        if (ptIdx >= traj.pts.length) {
+          // Done
+          launching = false;
+          launchBtn.disabled = false;
+          current.animPt = null;
+          records.push({ pts: traj.pts, maxH: traj.maxH, maxDist: traj.maxDist });
+          if (records.length > 10) records.shift();
+          // Update record list
+          updateRecords();
+          heightBadge.textContent = `높이: ${traj.maxH} m  |  거리: ${traj.maxDist} m`;
+          drawScene(null, records);
+          return;
+        }
+        current.pts = traj.pts.slice(0, ptIdx + 1);
+        current.animPt = traj.pts[ptIdx];
+        heightBadge.textContent = `높이: ${Math.round(current.animPt.y)} m  |  거리: ${Math.round(current.animPt.x)} m`;
+        const allH = [...records.map(r => r.maxH), traj.maxH, 110];
+        const maxH = Math.max(...allH);
+        const allX = [...records.map(r => r.pts[r.pts.length-1].x), traj.pts[traj.pts.length-1].x, 1];
+        const maxX = Math.max(...allX);
+        drawScene(current, records);
+        ptIdx += 2;
+        animId = requestAnimationFrame(frame);
+      }
+
+      animId = requestAnimationFrame(frame);
+    }
+
+    function updateRecords() {
+      if (records.length === 0) {
+        recordList.innerHTML = '<li style="color:var(--text-light);font-size:0.9cqw">아직 발사 기록이 없어요.</li>';
+        if (recordCount) recordCount.textContent = '(0 / 10)';
+        return;
+      }
+      if (recordCount) recordCount.textContent = `(${records.length} / 10)`;
+      const colors = COLORS;
+      recordList.innerHTML = records.map((r, i) =>
+        `<li>
+          <span class="rec-p" style="color:${colors[i % colors.length]}">${(i + 1).toString().padStart(2,'0')} 발사</span>
+          <span style="display:flex;gap:0.8cqw;font-family:var(--font-mono);font-size:0.9cqw;">
+            <span title="최고 높이">↑ ${r.maxH}m</span>
+            <span title="비행 거리" style="color:var(--teal);">→ ${r.maxDist}m</span>
+          </span>
+        </li>`
+      ).join('');
+    }
+
+    launchBtn.addEventListener('click', launch);
+
+    resetBtn.addEventListener('click', () => {
+      if (launching) return;
+      records = [];
+      updateRecords();
+      heightBadge.textContent = '높이: — m  |  거리: — m';
+      drawScene(null, records);
+    });
+
+    // Resize observer
+    const ro = new ResizeObserver(() => resizeCanvas());
+    ro.observe(canvas.parentElement);
+    resizeCanvas();
+  }
+
+  setupRocketSim();
+
+  // ============ MOLECULE TEMPERATURE CONTROL ============
+  function enhanceMoleculeControl() {
+    const tempSlider = document.getElementById('molTemp');
+    const tempVal = document.getElementById('molTempVal');
+    if (!tempSlider || !slide4Anim) return;
+
+    const labels = ['매우 낮음', '낮음', '보통', '높음', '매우 높음'];
+    tempSlider.addEventListener('input', () => {
+      const v = +tempSlider.value;
+      tempVal.textContent = labels[Math.round(v) - 1] || '보통';
+      // Update molecule velocities based on temperature
+      if (slide4Anim.setSpeed) slide4Anim.setSpeed(v);
+    });
+  }
+  enhanceMoleculeControl();
+
+  // ============ Finally: show first slide (after all setup is done) ============
+  show(0);
+</script>
+
+</body>
+</html>
